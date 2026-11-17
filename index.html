@@ -347,15 +347,32 @@ function renderBosses(filter = "") {
                 else maleDrop.push(d);
             });
 
-            const createCheckboxes = (arr, prefix) => {
+         const createCheckboxes = (arr, prefix) => {
                 return arr.map(item => {
                     if (!item || item === "Комната") return "";
                     const cleanName = item.replace(/\(x\d+\)/g, '').trim();
                     const id = `drop_${b.name}_${prefix}_${cleanName}`;
                     const isChecked = getSaved(id, false);
-                    return `<label class="checkbox-label ${isChecked ? 'checked' : ''}" id="lbl_${id}">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${id}', this.checked, this.parentElement)">
-                        ${item}
+                    
+                    // Очищаем имена от спецсимволов для создания имени файла
+                    const safeBossName = b.name.replace(/[«»"'()]/g, '').trim();
+                    const safeItemName = cleanName.replace(/[«»"'()]/g, '').trim();
+                    
+                    // Добавляем пометку пола, если это М или Ж
+                    let genderSuffix = "";
+                    if (prefix === 'M') genderSuffix = "(М)";
+                    if (prefix === 'F') genderSuffix = "(Ж)";
+
+                    // Итоговое имя файла: img/ИмяБосса_Предмет(Пол).png
+                    const imgSrc = `img/${safeBossName}_${safeItemName}${genderSuffix}.png`;
+                    
+                    // Если картинки нет, она просто скроется (не будет битой иконки)
+                    const imgHtml = `<img src="${imgSrc}" onerror="this.style.display='none'" style="width: 28px; height: 28px; object-fit: contain; margin-right: 8px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px;">`;
+
+                    return `<label class="checkbox-label ${isChecked ? 'checked' : ''}" id="lbl_${id}" style="display: flex; align-items: center;">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${id}', this.checked, this.parentElement)" style="margin-right: 6px;">
+                        ${imgHtml}
+                        <span>${item}</span>
                     </label>`;
                 }).join('');
             };
