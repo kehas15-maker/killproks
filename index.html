@@ -346,8 +346,7 @@ function renderBosses(filter = "") {
                 else if (d.includes('(Ж):')) femaleDrop.push(d.replace('(Ж):', '').trim());
                 else maleDrop.push(d);
             });
-
-         const createCheckboxes = (arr, prefix) => {
+            const createCheckboxes = (arr, prefix) => {
                 return arr.map(item => {
                     if (!item || item === "Комната") return "";
                     const cleanName = item.replace(/\(x\d+\)/g, '').trim();
