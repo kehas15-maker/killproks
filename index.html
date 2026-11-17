@@ -7,10 +7,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@400;700&display=swap');
 
-        body { 
+         body { 
             font-family: 'Montserrat', Arial, sans-serif; 
             margin: 0; 
-            background: #1a1a1a; 
+            /* Твой цвет фона на случай, если картинка не загрузится */
+            background-color: #1a1a1a; 
+            /* Путь к картинке (если она в той же папке, что и index.html) */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             color: #eee; 
             display: flex;
             flex-direction: column;
