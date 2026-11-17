@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База Знаний Безумия</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@400;700&display=swap');
+
+        body { 
+            font-family: 'Montserrat', Arial, sans-serif; 
+            margin: 0; 
+            background: #1a1a1a; 
+            color: #eee; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .main-title {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            font-size: 24px;
+            color: #e74c3c;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            padding: 15px 10px;
+            background: #111;
+            margin: 0;
+            border-bottom: 2px solid #333;
+            letter-spacing: 2px;
+        }
+
+        .tabs { display: flex; background: #2a2a2a; position: sticky; top: 0; z-index: 10; overflow-x: auto; }
+        .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; white-space: nowrap; color: #aaa; transition: 0.2s; font-size: 13px;}
+        .tab:hover { color: #fff; background: #333; }
+        .tab.active { border-bottom-color: #e74c3c; color: #e74c3c; }
+        
+        .content-wrapper { flex: 1; }
+        .content { padding: 10px; display: none; }
+        .content.active { display: block; }
+        
+        .floor-header { background: #333; padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 6px; font-weight: bold; display: flex; justify-content: space-between; border-left: 4px solid #e74c3c; }
+        .floor-header:hover { background: #444; }
+        .floor-content { display: none; margin-bottom: 15px; }
+        .floor-content.open { display: block; }
+        
+        .card { background: #2a2a2a; border-radius: 8px; margin-bottom: 12px; padding: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .card h3 { margin: 0 0 4px; color: #f39c12; font-size: 16px; }
+        .sub { color: #3498db; font-size: 13px; margin-bottom: 8px; }
+        
+        .stats-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; background: #1e1e1e; padding: 6px 8px; border-radius: 4px; }
+        .stat-hp { color: #2ecc71; font-weight: bold; }
+        .stat-dmg { color: #e74c3c; font-weight: bold; }
+
+        .reward-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        .reward-table th { text-align: left; color: #aaa; font-weight: normal; padding-bottom: 4px; border-bottom: 1px solid #444; }
+        .reward-table td { padding: 4px 0; border-bottom: 1px solid #333; }
+        .reward-table td:last-child { text-align: right; color: #ccc; }
+        
+        .drop-item { margin-top: 6px; font-size: 13px; color: #1abc9c; }
+        .item-name { color: #f1c40f; font-weight: bold; }
+        .chance { color: #e67e22; font-weight: bold; }
+        .chance-pills { color: #e74c3c; font-weight: bold; font-size: 12px; }
+        
+        .small { font-size: 12px; color: #888; }
+        .search { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: none; background: #333; color: #fff; box-sizing: border-box; font-size: 14px; }
+        
+        .exp { color: #9b59b6; font-weight: bold; }
+        .gold { color: #e67e22; font-weight: bold; }
+        .pills { color: #e74c3c; font-weight: bold; }
+        .cash { color: #2ecc71; font-weight: bold; }
+
+        .biz-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+        .biz-table th { background: #333; padding: 4px; text-align: left; color: #aaa; }
+        .biz-table td { padding: 4px; border-bottom: 1px solid #444; }
+        .biz-table tr:last-child td { border-bottom: none; }
+        .biz-table td.exp { color: #9b59b6; }
+        .biz-table td.gold { color: #e67e22; }
+        .biz-table td.pills { color: #e74c3c; }
+        .biz-table td.cash { color: #2ecc71; }
+        
+        .total-row { margin-top: 8px; padding-top: 6px; border-top: 1px solid #555; font-size: 13px; color: #f1c40f; font-weight: bold; }
+
+        /* Чекбоксы */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #ccc; cursor: pointer; background: #333; padding: 4px 8px; border-radius: 4px; }
+        .checkbox-label input { cursor: pointer; }
+        .checkbox-label.checked { background: #2ecc71; color: #000; font-weight: bold; }
+        
+        .biz-check { margin-top: 10px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: bold; color: #f1c40f; cursor: pointer; }
+        .biz-check input { cursor: pointer; width: 18px; height: 18px; }
+        .biz-check.checked { color: #2ecc71; }
+
+        /* Калькулятор */
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .calc-item { display: flex; flex-direction: column; }
+        .calc-item label { font-size: 12px; color: #aaa; margin-bottom: 4px; }
+        .calc-item input { padding: 8px; border-radius: 4px; border: none; background: #333; color: #fff; font-size: 16px; text-align: center; }
+        .btn-calc { width: 100%; padding: 12px; background: #e74c3c; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .btn-calc:hover { background: #c0392b; }
+        .calc-results { background: #1e1e1e; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+
+        .footer { text-align: center; padding: 20px 10px; background: #111; border-top: 2px solid #333; margin-top: 20px; font-size: 14px; color: #bbb; }
+        .footer .clan { font-weight: bold; color: #f39c12; font-size: 16px; margin-bottom: 4px; }
+        .footer .author { font-size: 12px; color: #666; font-family: 'Courier New', monospace; }
+    </style>
+</head>
+<body>
+
+<h1 class="main-title">БАЗА ЗНАНИЙ БЕЗУМИЯ</h1>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('bosses')">Буйные</div>
+    <div class="tab" onclick="switchTab('businesses')">Бизнесы</div>
+    <div class="tab" onclick="switchTab('calc')">Кальк W</div>
+    <div class="tab" onclick="switchTab('items')">Итемы</div>
+    <div class="tab" onclick="switchTab('info')">Справка</div>
+</div>
+
+<div class="content-wrapper">
+    <div id="bosses" class="content active">
+        <input class="search" type="text" id="searchBoss" placeholder="Поиск босса..." oninput="filterBosses()">
+        <div id="bossList"></div>
+    </div>
+
+    <div id="businesses" class="content">
+        <!-- Новый фильтр по наградам -->
+        <select id="bizFilter" class="search" onchange="renderBusinesses()">
+            <option value="all">Все награды</option>
+            <option value="gold">💰 Только Золото</option>
+            <option value="pills">💊 Только Пилюли</option>
+            <option value="exp">👁️ Только Опыт</option>
+            <option value="cash">💵 Только Купюры</option>
+        </select>
+        <div id="bizList"></div>
+    </div>
+
+    <div id="calc" class="content">
+        <div class="card">
+            <h3>Калькулятор W (Оптимальный)</h3>
+            <p class="small">Введите ваши текущие ресурсы. Скрипт найдет лучший план крафта.</p>
+            <div class="calc-grid">
+                <div class="calc-item"><label>A-10</label><input type="number" id="inp-A" value="0"></div>
+                <div class="calc-item"><label>I-10</label><input type="number" id="inp-I" value="0"></div>
+                <div class="calc-item"><label>F-10</label><input type="number" id="inp-F" value="0"></div>
+                <div class="calc-item"><label>X-10</label><input type="number" id="inp-X" value="0"></div>
+                <div class="calc-item"><label>S-10</label><input type="number" id="inp-S" value="0"></div>
+                <div class="calc-item"><label>Z-10</label><input type="number" id="inp-Z" value="0"></div>
+                <div class="calc-item"><label>W-10 (уже есть)</label><input type="number" id="inp-W" value="0"></div>
+            </div>
+            <button class="btn-calc" onclick="calculateW()">Рассчитать</button>
+            <div class="calc-results" id="calc-results">Ожидание расчёта...</div>
+        </div>
+    </div>
+
+    <div id="items" class="content">
+        <div id="itemList"></div>
+    </div>
+
+    <div id="info" class="content">
+        <div class="card">
+            <h3>Справка</h3>
+            <p><span class="exp">Опыт (Глаз)</span> — опыт для прокачки.</p>
+            <p><span class="gold">Золото</span> — основная валюта.</p>
+            <p><span class="pills">Пилюли</span> — особая валюта.</p>
+            <p><span class="cash">Купюры (Баксы)</span> — валюта высоких этажей.</p>
+            <p class="small">Галочки сохраняются автоматически. Чтобы сбросить прогресс — очистите кэш браузера.</p>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="clan">Специально для клана •𝓝𝓮𝔀 𝓦𝓪𝓿𝓮• -•NW•</div>
+    <div class="author">®Killproks</div>
+</div>
+
+<script>
+// --- ДАННЫЕ ---
+const bosses = [
+    { name: "Генри Литен", floor: "A-1", hp: "600", dmg: "5-20", level: "7-15", exp: "25", gold: "—", pills: "—", pillsChance: "", item: "Ошейник", chance: "100%", drop: "Комната" },
+    { name: "Амалия Банши", floor: "A-1", hp: "300", dmg: "10-20", level: "2-15", exp: "25", gold: "—", pills: "—", pillsChance: "", item: "Бинты", chance: "100%", drop: "Комната" },
+    { name: "«Малыш» Джон", floor: "A-2", hp: "2500", dmg: "15-30", level: "15-25", exp: "75", gold: "—", pills: "—", pillsChance: "", item: "Зайчик", chance: "100%", drop: "Комната" },
+    { name: "Крошка «Сью»", floor: "A-2", hp: "3k", dmg: "15-20", level: "15-25", exp: "75", gold: "—", pills: "—", pillsChance: "", item: "Нож", chance: "100%", drop: "Комната" },
+    { name: "Охранник Манфред", floor: "A-3", hp: "7k", dmg: "20-35", level: "23-30", exp: "115", gold: "500", pills: "—", pillsChance: "", item: "Фуражка", chance: "100%", drop: "Комната" },
+    { name: "Руди «Аналитик»", floor: "A-3", hp: "7k", dmg: "15-40", level: "23-40", exp: "150", gold: "—", pills: "200", pillsChance: "", item: "Физраствор", chance: "100%", drop: "Комната" },
+    { name: "Аксель Шварценштайн", floor: "B-1", hp: "11k", dmg: "40-60", level: "25-44", exp: "145", gold: "50", pills: "—", pillsChance: "", item: "Поводок", chance: "100%", drop: "Комната, Перчатки" },
+    { name: "Агнет «Балерина»", floor: "B-1", hp: "11k", dmg: "40-60", level: "25-44", exp: "145", gold: "50", pills: "—", pillsChance: "", item: "Тесак", chance: "100%", drop: "Комната, Аксессуар" },
+    { name: "Дорин Гамбрино", floor: "B-2", hp: "100k", dmg: "160-480", level: "30-50", exp: "200", gold: "75", pills: "—", pillsChance: "", item: "Оковы", chance: "100%", drop: "Комната, Обувь" },
+    { name: "Бруно Цугенкоф", floor: "B-2", hp: "130k", dmg: "140-430", level: "30-50", exp: "200", gold: "75", pills: "—", pillsChance: "", item: "Череп", chance: "100%", drop: "Комната, Штаны" },
+    { name: "Сестра Каролайн", floor: "B-3", hp: "140k", dmg: "160-490", level: "34-55", exp: "300", gold: "125", pills: "—", pillsChance: "", item: "Халат", chance: "100%", drop: "Комната, Куртка" },
+    { name: "Олаф Слатер", floor: "B-3", hp: "120k", dmg: "130-390", level: "34-55", exp: "300", gold: "125", pills: "—", pillsChance: "", item: "Топор", chance: "100%", drop: "Комната, Головной убор, Маска" },
+    { name: "Гордон Кибероуз", floor: "C-1", hp: "200k", dmg: "200-600", level: "37-69", exp: "450", gold: "200", pills: "—", pillsChance: "", item: "Грабли", chance: "100%", drop: "Комната, Аксессуар" },
+    { name: "Дуглас Макфадден", floor: "C-1", hp: "170k", dmg: "180-550", level: "37-69", exp: "450", gold: "200", pills: "—", pillsChance: "", item: "Пропуск", chance: "100%", drop: "Комната, Перчатки" },
+    { name: "Броуди Кавальери", floor: "C-2", hp: "210k", dmg: "220-680", level: "44-77", exp: "525", gold: "250", pills: "—", pillsChance: "", item: "Кандалы", chance: "100%", drop: "Комната, Куртка" },
+    { name: "Франческа Де ла Пизани", floor: "C-2", hp: "200k", dmg: "200-600", level: "44-77", exp: "525", gold: "250", pills: "—", pillsChance: "", item: "Шапка", chance: "100%", drop: "Комната, Штаны" },
+    { name: "Ален Грант", floor: "C-3", hp: "230k", dmg: "180-550", level: "48-87", exp: "650", gold: "325", pills: "—", pillsChance: "", item: "Обугленный череп", chance: "100%", drop: "Комната, Маска, Оружие" },
+    { name: "Элайза Картер", floor: "C-3", hp: "240k", dmg: "230-650", level: "48-87", exp: "650", gold: "325", pills: "—", pillsChance: "", item: "Рога", chance: "100%", drop: "Комната, Обувь, Головной убор" },
+    { name: "Вальтер Шпинне", floor: "D-1", hp: "200k", dmg: "500-1k", level: "42-80", exp: "2000", gold: "—", pills: "50-3850", pillsChance: "40%", item: "Сломанный замок", chance: "100%", drop: "(М): Комната, Аксессуар, Маска | (Ж): Комната, Оружие, Штаны, Куртка" },
+    { name: "Стефан и Ганс Крейг", floor: "D-1", hp: "400k", dmg: "350-1050", level: "50-95", exp: "750", gold: "7000", pills: "—", pillsChance: "", item: "Противогаз", chance: "20%", drop: "(М): Комната, Оружие, Штаны, Головной убор | (Ж): Комната, Куртка, Аксессуар" },
+    { name: "Геррод и Герда", floor: "D-2", hp: "450k", dmg: "300-1k", level: "57-105", exp: "850", gold: "400", pills: "—", pillsChance: "", item: "Клок волос", chance: "20%", drop: "(М): Комната, Перчатки (x2), Обувь | (Ж): Комната, Аксессуар (x2), Маска" },
+    { name: "Зузанна и Анита Болеславски", floor: "D-2", hp: "400k", dmg: "350-1k", level: "57-105", exp: "850", gold: "400", pills: "—", pillsChance: "", item: "Когти", chance: "20%", drop: "(М): Комната, Аксессуар (x2) | (Ж): Комната, Обувь, Перчатки" },
+    { name: "Аделаида Шальца", floor: "D-3", hp: "500k", dmg: "300-900", level: "62-113", exp: "1000", gold: "500", pills: "—", pillsChance: "", item: "Роза", chance: "20%", drop: "(М): Комната, Маска, Куртка, Оружие | (Ж): Комната, Перчатки, Головной убор" },
+    { name: "Хуго Ван Дер Вейден", floor: "D-3", hp: "500k", dmg: "400-1200", level: "62-113", exp: "1000", gold: "500", pills: "—", pillsChance: "", item: "Клоунский нос", chance: "20%", drop: "(М): Комната, Куртка, Штаны, Головной убор | (Ж): Комната, Оружие, Штаны, Маска" },
+    { name: "Иероним Георг фон Риттер", floor: "E-1", hp: "750k", dmg: "600-1800", level: "68-115", exp: "1175", gold: "600", pills: "—", pillsChance: "", item: "Механическая рука", chance: "20%", drop: "Комната, Обувь" },
+    { name: "Фрау Анжелика Буркхардт", floor: "E-1", hp: "800k", dmg: "500-1500", level: "68-115", exp: "1175", gold: "600", pills: "—", pillsChance: "", item: "Клешня", chance: "20%", drop: "Комната, Маска" },
+    { name: "Карл Магнус Иверман", floor: "E-2", hp: "900k", dmg: "600-1800", level: "73-118", exp: "1350", gold: "700", pills: "—", pillsChance: "", item: "Наконечник копья", chance: "20%", drop: "Комната, Штаны, Оружие" },
+    { name: "Отто Магнус Иверман", floor: "E-2", hp: "900k", dmg: "600-2k", level: "73-118", exp: "1350", gold: "700", pills: "—", pillsChance: "", item: "Лезвие косы", chance: "20%", drop: "Комната, Аксессуар, Оружие" },
+    { name: "Кибер-адъюнкт v.3.5", floor: "E-3", hp: "950k", dmg: "500-1500", level: "77-120", exp: "1500", gold: "800", pills: "—", pillsChance: "", item: "Киберчереп", chance: "20%", drop: "Комната, Головной убор, Питомец" },
+    { name: "Профессор Г. Буркхардт", floor: "E-3", hp: "1kk", dmg: "650-2k", level: "77-120", exp: "1500", gold: "800", pills: "—", pillsChance: "", item: "Планшет", chance: "20%", drop: "Комната, Куртка, Перчатки" },
+    { name: "Вий", floor: "F-1", hp: "1200k", dmg: "600-2k", level: "79-120", exp: "1600", gold: "850", pills: "—", pillsChance: "", item: "Рвань", chance: "15%", drop: "Комната, Куртка" },
+    { name: "Директориус", floor: "F-1", hp: "1300k", dmg: "600-1800", level: "79-120", exp: "1650", gold: "875", pills: "—", pillsChance: "", item: "Корона", chance: "15%", drop: "Комната, Штаны, Оружие" },
+    { name: "Бабушка", floor: "F-2", hp: "1400k", dmg: "600-2000", level: "80-121", exp: "1750", gold: "915", pills: "—", pillsChance: "", item: "Прах", chance: "15%", drop: "Комната, Перчатки, Оружие" },
+    { name: "Экзекутор", floor: "F-2", hp: "1300k", dmg: "700-2300", level: "80-121", exp: "1700", gold: "900", pills: "—", pillsChance: "", item: "Крюк", chance: "15%", drop: "Комната, Обувь" },
+    { name: "Нерожденные", floor: "F-3", hp: "1500k", dmg: "600-1700", level: "82-122", exp: "1800", gold: "935", pills: "—", pillsChance: "", item: "Кольцо", chance: "10%", drop: "Комната, Аксессуар" },
+    { name: "Оно", floor: "F-3", hp: "1600k", dmg: "700-2200", level: "82-122", exp: "1900", gold: "950", pills: "—", pillsChance: "", item: "Сердце", chance: "10%", drop: "Комната, Маска, Головной убор, Оружие" },
+    { name: "Кентавр", floor: "G-1", hp: "650k", dmg: "200-700", level: "27-95", exp: "157", gold: "61", pills: "—", pillsChance: "", item: "Голова", chance: "20%", drop: "Комната" },
+    { name: "Курильщица", floor: "G-1", hp: "600k", dmg: "250-800", level: "27-95", exp: "155", gold: "60", pills: "—", pillsChance: "", item: "Зародыши", chance: "20%", drop: "Комната" },
+    { name: "Лоботом", floor: "G-2", hp: "700k", dmg: "250-800", level: "29-105", exp: "163", gold: "65", pills: "—", pillsChance: "", item: "Шип", chance: "20%", drop: "Комната" },
+    { name: "Утопленный", floor: "G-2", hp: "700k", dmg: "300-900", level: "29-105", exp: "161", gold: "63", pills: "—", pillsChance: "", item: "Рваная маска", chance: "20%", drop: "Комната" },
+    { name: "Привратник", floor: "G-3", hp: "800k", dmg: "550-1500", level: "32-115", exp: "164", gold: "66", pills: "—", pillsChance: "", item: "Коготь", chance: "20%", drop: "Комната, Оружие, Штаны, Куртка, Перчатки, Обувь, Аксессуар, Маска, Головной убор" },
+    { name: "Упырь", floor: "G-3", hp: "800k", dmg: "500-1500", level: "32-115", exp: "164", gold: "66", pills: "—", pillsChance: "", item: "Щупальце", chance: "20%", drop: "Комната" },
+    { name: "Матка", floor: "H-1", hp: "1600k", dmg: "500-1500", level: "58-68", exp: "855", gold: "400", pills: "—", pillsChance: "", item: "Лохмотье", chance: "20%", drop: "Комната" },
+    { name: "Шаман", floor: "H-1", hp: "1600k", dmg: "450-1400", level: "58-68", exp: "867", gold: "403", pills: "—", pillsChance: "", item: "Потертый череп", chance: "20%", drop: "Комната" },
+    { name: "Вектор", floor: "H-2", hp: "2kk", dmg: "400-1300", level: "62-140", exp: "858", gold: "403", pills: "—", pillsChance: "", item: "Рукоять", chance: "20%", drop: "Комната" },
+    { name: "Самсон", floor: "H-2", hp: "2kk", dmg: "450-1300", level: "62-140", exp: "861", gold: "408", pills: "—", pillsChance: "", item: "Кисть", chance: "20%", drop: "Комната" },
+    { name: "Безликая", floor: "H-3", hp: "2kk", dmg: "450-1350", level: "65-155", exp: "864", gold: "409", pills: "—", pillsChance: "", item: "Лезвия", chance: "20%", drop: "Комната" },
+    { name: "Кровожадный Али", floor: "H-3", hp: "2500k", dmg: "500-1500", level: "65-155", exp: "866", gold: "413", pills: "—", pillsChance: "", item: "Палец", chance: "20%", drop: "Комната, Оружие, Штаны, Куртка, Перчатки, Обувь, Аксессуар, Маска, Головной убор" }
+];
+
+const businesses = [
+    { name: "Сестринская", floor: "A-1", reqs: ["Бинты 1", "Бинты 2", "Бинты 3", "Бинты 4", "Бинты 5", "Бинты 6"], rewards: [{exp: "—", gold: "—", pills: "23", cash: "—"}, {exp: "—", gold: "—", pills: "30", cash: "—"}, {exp: "—", gold: "—", pills: "38", cash: "—"}, {exp: "—", gold: "—", pills: "45", cash: "—"}, {exp: "—", gold: "—", pills: "53", cash: "—"}, {exp: "—", gold: "—", pills: "60", cash: "—"}], total: "Бинты 21" },
+    { name: "Фармацевтический склад", floor: "A-1", reqs: ["Ошейник 1", "Ошейник 2", "Ошейник 3", "Ошейник 4", "Ошейник 5", "Ошейник 6"], rewards: [{exp: "—", gold: "75", pills: "—", cash: "—"}, {exp: "—", gold: "90", pills: "—", cash: "—"}, {exp: "—", gold: "105", pills: "—", cash: "—"}, {exp: "—", gold: "120", pills: "—", cash: "—"}, {exp: "—", gold: "135", pills: "—", cash: "—"}, {exp: "—", gold: "150", pills: "—", cash: "—"}], total: "Ошейник 21" },
+    { name: "Смотровая", floor: "A-1", reqs: ["Монеты 350", "Монеты 380", "Монеты 410", "Монеты 440", "Монеты 470", "Монеты 500"], rewards: [{exp: "—", gold: "—", pills: "23", cash: "—"}, {exp: "—", gold: "—", pills: "30", cash: "—"}, {exp: "—", gold: "—", pills: "38", cash: "—"}, {exp: "—", gold: "—", pills: "45", cash: "—"}, {exp: "—", gold: "—", pills: "53", cash: "—"}, {exp: "—", gold: "—", pills: "60", cash: "—"}], total: "Монеты 2550" },
+    { name: "Игровая комната", floor: "A-2", reqs: ["Зайчик 1", "Зайчик 2 + Бинты 5", "Зайчик 2 + Бинты 5", "Зайчик 4", "Зайчик 5 + Ошейник 7 + Бинты 7", "Зайчик 8"], rewards: [{exp: "—", gold: "—", pills: "45", cash: "—"}, {exp: "—", gold: "—", pills: "53", cash: "—"}, {exp: "—", gold: "—", pills: "60", cash: "—"}, {exp: "—", gold: "—", pills: "68", cash: "—"}, {exp: "—", gold: "—", pills: "75", cash: "—"}, {exp: "—", gold: "—", pills: "83", cash: "—"}], total: "Зайчик 22, Бинты 17, Ошейник 7" },
+    { name: "Реабилитационный покой", floor: "A-2", reqs: ["Нож 1 + Ошейник 3", "Нож 2 + Бинты 5", "Нож 4", "Нож 6", "Нож 5 + Ошейник 7 + Бинты 7", "Нож 7"], rewards: [{exp: "—", gold: "150", pills: "—", cash: "—"}, {exp: "—", gold: "188", pills: "—", cash: "—"}, {exp: "—", gold: "225", pills: "—", cash: "—"}, {exp: "—", gold: "263", pills: "—", cash: "—"}, {exp: "—", gold: "300", pills: "—", cash: "—"}, {exp: "—", gold: "338", pills: "—", cash: "—"}], total: "Нож 25, Ошейник 10, Бинты 12" },
+    { name: "Проходная", floor: "A-3", reqs: ["Нож 10 + Физраствор 1", "Нож 15 + Физраствор 6", "Нож 20 + Физраствор 11", "Нож 24 + Физраствор 14", "Нож 25 + Физраствор 17", "Нож 30 + Физраствор 17"], rewards: [{exp: "—", gold: "203", pills: "—", cash: "—"}, {exp: "—", gold: "248", pills: "—", cash: "—"}, {exp: "—", gold: "293", pills: "—", cash: "—"}, {exp: "—", gold: "338", pills: "—", cash: "—"}, {exp: "—", gold: "383", pills: "—", cash: "—"}, {exp: "—", gold: "428", pills: "—", cash: "—"}], total: "Нож 124, Физраствор 66" },
+    { name: "Комната видеонаблюдения", floor: "A-3", reqs: ["Зайчик 10 + Фуражка 1", "Зайчик 15 + Фуражка 6", "Зайчик 20 + Фуражка 11", "Зайчик 24 + Фуражка 14", "Зайчик 17 + Фуражка 25", "Зайчик 30 + Фуражка 17"], rewards: [{exp: "23", gold: "—", pills: "—", cash: "—"}, {exp: "68", gold: "—", pills: "—", cash: "—"}, {exp: "113", gold: "—", pills: "—", cash: "—"}, {exp: "158", gold: "—", pills: "—", cash: "—"}, {exp: "203", gold: "—", pills: "—", cash: "—"}, {exp: "248", gold: "—", pills: "—", cash: "—"}], total: "Зайчик 116, Фуражка 74" },
+    { name: "Регистратура", floor: "B-1", reqs: ["Тесак 5 + Физраствор 15", "Тесак 8 + Физраствор 20", "Тесак 12 + Физраствор 25", "Тесак 17 + Физраствор 40"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "150", gold: "—", pills: "—", cash: "—"}, {exp: "225", gold: "—", pills: "—", cash: "—"}, {exp: "300", gold: "—", pills: "—", cash: "—"}], total: "Тесак 42, Физраствор 100" },
+    { name: "Исследовательская", floor: "B-1", reqs: ["Поводок 8 + Фуражка 15", "Поводок 8 + Фуражка 20", "Поводок 12 + Фуражка 25", "Поводок 17 + Фуражка 40", "Поводок 20 + Тесак 20"], rewards: [{exp: "75", gold: "75", pills: "—", cash: "—"}, {exp: "98", gold: "120", pills: "—", cash: "—"}, {exp: "120", gold: "165", pills: "—", cash: "—"}, {exp: "143", gold: "210", pills: "—", cash: "—"}, {exp: "180", gold: "255", pills: "—", cash: "—"}], total: "Поводок 65, Фуражка 100, Тесак 20" },
+    { name: "Инъекционная", floor: "B-2", reqs: ["Поводок 4 + Оковы 3 + Череп 3", "Тесак 4 + Оковы 3 + Череп 3", "Поводок 7 + Оковы 5 + Череп 5", "Тесак 7 + Оковы 5 + Череп 5", "Поводок 13 + Оковы 9 + Череп 9", "Тесак 13 + Оковы 9 + Череп 9", "Оковы 13 + Череп 13"], rewards: [{exp: "—", gold: "225", pills: "—", cash: "—"}, {exp: "—", gold: "300", pills: "—", cash: "—"}, {exp: "—", gold: "375", pills: "—", cash: "—"}, {exp: "150", gold: "375", pills: "—", cash: "—"}, {exp: "225", gold: "375", pills: "—", cash: "—"}, {exp: "360", gold: "375", pills: "—", cash: "—"}, {exp: "465", gold: "450", pills: "—", cash: "—"}], total: "Поводок 24, Тесак 24, Оковы 42, Череп 42" },
+    { name: "Склад", floor: "B-3", reqs: ["Оковы 7 + Топор 3", "Оковы 10 + Топор 6", "Халат 13 + Топор 13"], rewards: [{exp: "—", gold: "300", pills: "—", cash: "—"}, {exp: "—", gold: "420", pills: "—", cash: "—"}, {exp: "—", gold: "510", pills: "—", cash: "—"}], total: "Оковы 17, Халат 13, Топор 22" },
+    { name: "Серверная", floor: "B-3", reqs: ["Череп 7 + Халат 3", "Череп 10 + Халат 6", "Топор 13 + Халат 13"], rewards: [{exp: "—", gold: "—", pills: "90", cash: "—"}, {exp: "—", gold: "—", pills: "105", cash: "—"}, {exp: "—", gold: "—", pills: "120", cash: "—"}], total: "Череп 17, Халат 22, Топор 13" },
+    { name: "Картотека", floor: "C-1", reqs: ["Халат 15 + Грабли 8", "Халат 21 + Грабли 9", "Халат 29 + Грабли 12", "Халат 40 + Грабли 19"], rewards: [{exp: "75", gold: "75", pills: "—", cash: "—"}, {exp: "120", gold: "128", pills: "—", cash: "—"}, {exp: "165", gold: "180", pills: "—", cash: "—"}, {exp: "210", gold: "233", pills: "—", cash: "—"}], total: "Халат 105, Грабли 48" },
+    { name: "Музей", floor: "C-1", reqs: ["Топор 15 + Пропуск 5", "Топор 20 + Пропуск 8", "Топор 25 + Пропуск 12", "Топор 40 + Пропуск 17", "Топор 51 + Пропуск 22", "Топор 55 + Пропуск 23", "Топор 60 + Пропуск 25"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "113", gold: "—", pills: "—", cash: "—"}, {exp: "150", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "225", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}, {exp: "300", gold: "—", pills: "—", cash: "—"}], total: "Топор 266, Пропуск 112" },
+    { name: "Холодильная камера", floor: "C-2", reqs: ["Грабли 9 + Кандалы 3", "Грабли 14 + Кандалы 6", "Грабли 19 + Кандалы 9", "Грабли 24 + Кандалы 15", "Грабли 31 + Кандалы 19"], rewards: [{exp: "—", gold: "225", pills: "—", cash: "—"}, {exp: "—", gold: "266", pills: "—", cash: "—"}, {exp: "—", gold: "306", pills: "—", cash: "—"}, {exp: "—", gold: "347", pills: "—", cash: "—"}, {exp: "—", gold: "387", pills: "—", cash: "—"}], total: "Грабли 97, Кандалы 52" },
+    { name: "Отделение препарации", floor: "C-2", reqs: ["Пропуск 13 + Шапка 7", "Пропуск 20 + Шапка 12", "Пропуск 29 + Шапка 15", "Пропуск 35 + Шапка 18"], rewards: [{exp: "—", gold: "—", pills: "84", cash: "—"}, {exp: "—", gold: "—", pills: "95", cash: "—"}, {exp: "—", gold: "—", pills: "108", cash: "—"}, {exp: "—", gold: "—", pills: "123", cash: "—"}], total: "Пропуск 97, Шапка 52" },
+    { name: "Траурная", floor: "C-3", reqs: ["Шапка 8 + Рога 4", "Шапка 12 + Рога 9", "Шапка 13 + Рога 13", "Шапка 16 + Рога 15", "Шапка 18 + Рога 21"], rewards: [{exp: "—", gold: "263", pills: "—", cash: "—"}, {exp: "—", gold: "285", pills: "—", cash: "—"}, {exp: "—", gold: "323", pills: "—", cash: "—"}, {exp: "—", gold: "345", pills: "—", cash: "—"}, {exp: "—", gold: "368", pills: "—", cash: "—"}], total: "Шапка 67, Рога 62" },
+    { name: "Печь", floor: "C-3", reqs: ["Кандалы 8 + Обугленный череп 4", "Кандалы 12 + Обугленный череп 9", "Кандалы 13 + Обугленный череп 13", "Кандалы 18 + Обугленный череп 15"], rewards: [{exp: "—", gold: "—", pills: "83", cash: "—"}, {exp: "—", gold: "—", pills: "90", cash: "—"}, {exp: "—", gold: "—", pills: "98", cash: "—"}, {exp: "—", gold: "—", pills: "210", cash: "1"}], total: "Кандалы 51, Обугленный череп 41" },
+    { name: "Фильтрующая станция", floor: "D-1", reqs: ["Рога 7 + Сломанный замок 3", "Рога 10 + Сломанный замок 6", "Рога 13 + Сломанный замок 13"], rewards: [{exp: "300", gold: "—", pills: "—", cash: "—"}, {exp: "375", gold: "—", pills: "—", cash: "—"}, {exp: "525", gold: "—", pills: "—", cash: "—"}], total: "Рога 30, Сломанный замок 22" },
+    { name: "Станция водоснабжения", floor: "D-1", reqs: ["Обугленный череп 15 + Противогаз 8", "Обугленный череп 21 + Противогаз 9", "Обугленный череп 29 + Противогаз 12", "Обугленный череп 40 + Противогаз 19"], rewards: [{exp: "125", gold: "75", pills: "—", cash: "—"}, {exp: "200", gold: "128", pills: "—", cash: "—"}, {exp: "275", gold: "180", pills: "—", cash: "—"}, {exp: "350", gold: "233", pills: "—", cash: "—"}], total: "Обугленный череп 105, Противогаз 48" },
+    { name: "Резерв", floor: "D-2", reqs: ["Сломанный замок 9 + Клок волос 3", "Сломанный замок 14 + Клок волос 6", "Сломанный замок 19 + Клок волос 9", "Сломанный замок 24 + Клок волос 15", "Сломанный замок 31 + Клок волос 19"], rewards: [{exp: "—", gold: "225", pills: "—", cash: "—"}, {exp: "—", gold: "266", pills: "—", cash: "—"}, {exp: "—", gold: "306", pills: "—", cash: "—"}, {exp: "—", gold: "347", pills: "—", cash: "—"}, {exp: "—", gold: "387", pills: "—", cash: "—"}], total: "Сломанный замок 97, Клок волос 52" },
+    { name: "Пищеблок", floor: "D-2", reqs: ["Противогаз 13 + Когти 7", "Противогаз 20 + Когти 12", "Противогаз 29 + Когти 15", "Противогаз 35 + Когти 18"], rewards: [{exp: "—", gold: "—", pills: "83", cash: "—"}, {exp: "—", gold: "—", pills: "95", cash: "—"}, {exp: "—", gold: "—", pills: "108", cash: "—"}, {exp: "—", gold: "—", pills: "123", cash: "—"}], total: "Противогаз 97, Когти 52" },
+    { name: "Трансформатор", floor: "D-3", reqs: ["Когти 8 + Роза 4", "Когти 12 + Роза 9", "Когти 13 + Роза 13", "Когти 16 + Роза 15", "Когти 21 + Роза 18"], rewards: [{exp: "—", gold: "263", pills: "—", cash: "—"}, {exp: "—", gold: "285", pills: "—", cash: "—"}, {exp: "—", gold: "323", pills: "—", cash: "—"}, {exp: "—", gold: "345", pills: "—", cash: "—"}, {exp: "—", gold: "368", pills: "—", cash: "—"}], total: "Когти 70, Роза 59" },
+    { name: "Котельная", floor: "D-3", reqs: ["Клок волос 8 + Клоунский нос 4", "Клок волос 12 + Клоунский нос 9", "Клок волос 13 + Клоунский нос 13", "Клок волос 18 + Клоунский нос 15"], rewards: [{exp: "—", gold: "—", pills: "83", cash: "—"}, {exp: "—", gold: "—", pills: "90", cash: "—"}, {exp: "—", gold: "—", pills: "98", cash: "—"}, {exp: "—", gold: "—", pills: "105", cash: "—"}], total: "Клок волос 51, Клоунский нос 41" },
+    { name: "Аптека", floor: "E-1", reqs: ["Роза 10 + Механическая рука 3", "Роза 22 + Механическая рука 9", "Роза 27 + Механическая рука 13", "Роза 43 + Механическая рука 17", "Роза 43 + Механическая рука 21"], rewards: [{exp: "83", gold: "83", pills: "—", cash: "—"}, {exp: "128", gold: "135", pills: "—", cash: "—"}, {exp: "173", gold: "188", pills: "—", cash: "—"}, {exp: "225", gold: "248", pills: "—", cash: "—"}, {exp: "278", gold: "300", pills: "—", cash: "—"}], total: "Роза 145, Механическая рука 63" },
+    { name: "Приемный покой", floor: "E-1", reqs: ["Клоунский нос 7 + Клешня 3", "Клоунский нос 10 + Клешня 6", "Клоунский нос 18 + Клешня 13", "Клоунский нос 21 + Клешня 21", "Клоунский нос 27 + Клешня 27"], rewards: [{exp: "315", gold: "—", pills: "—", cash: "—"}, {exp: "390", gold: "—", pills: "—", cash: "—"}, {exp: "555", gold: "—", pills: "—", cash: "—"}, {exp: "600", gold: "—", pills: "—", cash: "—"}, {exp: "645", gold: "—", pills: "—", cash: "—"}], total: "Клоунский нос 83, Клешня 70" },
+    { name: "Карцер", floor: "E-2", reqs: ["Механическая рука 7 + Наконечник копья 4", "Механическая рука 17 + Наконечник копья 8", "Механическая рука 22 + Наконечник копья 12", "Механическая рука 26 + Наконечник копья 16", "Механическая рука 33 + Наконечник копья 20"], rewards: [{exp: "—", gold: "—", pills: "84", cash: "—"}, {exp: "—", gold: "—", pills: "96", cash: "—"}, {exp: "—", gold: "—", pills: "110", cash: "—"}, {exp: "—", gold: "—", pills: "125", cash: "—"}, {exp: "—", gold: "—", pills: "141", cash: "—"}], total: "Механическая рука 105, Наконечник копья 60" },
+    { name: "Свалка отходов", floor: "E-2", reqs: ["Механическая рука 9 + Лезвие косы 3", "Механическая рука 15 + Лезвие косы 7", "Механическая рука 21 + Лезвие косы 11", "Механическая рука 27 + Лезвие косы 15", "Механическая рука 33 + Лезвие косы 19"], rewards: [{exp: "—", gold: "270", pills: "—", cash: "—"}, {exp: "—", gold: "320", pills: "—", cash: "—"}, {exp: "—", gold: "369", pills: "—", cash: "—"}, {exp: "—", gold: "419", pills: "—", cash: "—"}, {exp: "—", gold: "468", pills: "—", cash: "—"}], total: "Механическая рука 105, Лезвие косы 55" },
+    { name: "Кабинет электротерапии", floor: "E-3", reqs: ["Лезвие косы 5 + Планшет 5", "Лезвие косы 15 + Планшет 9", "Лезвие косы 25 + Планшет 15", "Лезвие косы 30 + Планшет 16", "Лезвие косы 38 + Планшет 21"], rewards: [{exp: "—", gold: "323", pills: "—", cash: "—"}, {exp: "—", gold: "345", pills: "—", cash: "—"}, {exp: "—", gold: "368", pills: "—", cash: "—"}, {exp: "—", gold: "390", pills: "—", cash: "—"}, {exp: "—", gold: "413", pills: "—", cash: "—"}], total: "Лезвие косы 113, Планшет 66" },
+    { name: "Рентгенологическая служба", floor: "E-3", reqs: ["Наконечник копья 7 + Киберчереп 2", "Наконечник копья 15 + Киберчереп 7", "Наконечник копья 23 + Киберчереп 15", "Наконечник копья 31 + Киберчереп 18", "Наконечник копья 37 + Киберчереп 21"], rewards: [{exp: "165", gold: "—", pills: "—", cash: "—"}, {exp: "225", gold: "—", pills: "—", cash: "—"}, {exp: "450", gold: "—", pills: "—", cash: "—"}, {exp: "675", gold: "—", pills: "—", cash: "—"}, {exp: "750", gold: "—", pills: "—", cash: "1"}], total: "Наконечник копья 113, Киберчереп 63" },
+    { name: "Комната предварительного заключения", floor: "F-1", reqs: ["Механическая рука 14 + Рвань 5", "Механическая рука 23 + Рвань 8", "Механическая рука 29 + Рвань 13", "Механическая рука 36 + Рвань 17", "Механическая рука 43 + Рвань 21"], rewards: [{exp: "143", gold: "68", pills: "—", cash: "—"}, {exp: "225", gold: "105", pills: "—", cash: "—"}, {exp: "293", gold: "158", pills: "—", cash: "—"}, {exp: "360", gold: "203", pills: "—", cash: "—"}, {exp: "428", gold: "255", pills: "—", cash: "—"}], total: "Механическая рука 145, Рвань 64" },
+    { name: "Хранилище свежих органов", floor: "F-1", reqs: ["Клешня 7 + Корона 4", "Клешня 15 + Корона 8", "Клешня 19 + Корона 12", "Клешня 23 + Корона 15", "Клешня 29 + Корона 19"], rewards: [{exp: "270", gold: "—", pills: "—", cash: "—"}, {exp: "360", gold: "—", pills: "—", cash: "—"}, {exp: "540", gold: "—", pills: "—", cash: "—"}, {exp: "660", gold: "—", pills: "—", cash: "—"}, {exp: "780", gold: "—", pills: "—", cash: "—"}], total: "Клешня 93, Корона 58" },
+    { name: "Жертвенный алтарь", floor: "F-2", reqs: ["Рвань 9 + Крюк 5", "Рвань 15 + Крюк 8", "Рвань 21 + Крюк 12", "Рвань 27 + Крюк 15", "Рвань 32 + Крюк 18"], rewards: [{exp: "—", gold: "—", pills: "74", cash: "—"}, {exp: "—", gold: "—", pills: "87", cash: "—"}, {exp: "—", gold: "—", pills: "101", cash: "—"}, {exp: "—", gold: "—", pills: "114", cash: "—"}, {exp: "—", gold: "—", pills: "134", cash: "—"}], total: "Рвань 104, Крюк 58" },
+    { name: "Сектантская зала", floor: "F-2", reqs: ["Корона 17 + Прах 4", "Корона 15 + Прах 8", "Корона 19 + Прах 12", "Корона 23 + Прах 15", "Корона 29 + Прах 19"], rewards: [{exp: "—", gold: "234", pills: "—", cash: "—"}, {exp: "—", gold: "293", pills: "—", cash: "—"}, {exp: "—", gold: "315", pills: "—", cash: "—"}, {exp: "—", gold: "398", pills: "—", cash: "—"}, {exp: "—", gold: "462", pills: "—", cash: "—"}], total: "Корона 103, Прах 58" },
+    { name: "Притон", floor: "F-3", reqs: ["Крюк 7 + Кольцо 2", "Крюк 15 + Кольцо 5", "Крюк 22 + Кольцо 9", "Крюк 28 + Кольцо 14", "Крюк 33 + Кольцо 18"], rewards: [{exp: "375", gold: "—", pills: "—", cash: "—"}, {exp: "435", gold: "—", pills: "—", cash: "—"}, {exp: "525", gold: "—", pills: "—", cash: "—"}, {exp: "585", gold: "—", pills: "—", cash: "—"}, {exp: "825", gold: "—", pills: "—", cash: "—"}], total: "Крюк 105, Кольцо 48" },
+    { name: "Центр уринотерапии", floor: "F-3", reqs: ["Сердце 5 + Кольцо 5", "Сердце 9 + Кольцо 8", "Сердце 15 + Кольцо 15", "Сердце 22 + Кольцо 24", "Сердце 29 + Кольцо 29"], rewards: [{exp: "—", gold: "—", pills: "78", cash: "—"}, {exp: "—", gold: "—", pills: "95", cash: "—"}, {exp: "—", gold: "—", pills: "111", cash: "—"}, {exp: "—", gold: "—", pills: "128", cash: "—"}, {exp: "—", gold: "—", pills: "144", cash: "—"}], total: "Сердце 80, Кольцо 81" },
+    { name: "Подвальные полки", floor: "G-1", reqs: ["Зародыш 10 + Голова 5", "Зародыш 20 + Голова 10", "Зародыш 23 + Голова 15"], rewards: [{exp: "90", gold: "—", pills: "—", cash: "—"}, {exp: "180", gold: "—", pills: "—", cash: "—"}, {exp: "270", gold: "—", pills: "—", cash: "—"}], total: "Зародыш 53, Голова 30" },
+    { name: "Куча останков", floor: "G-1", reqs: ["Зародыш 7 + Голова 12", "Зародыш 14 + Голова 24", "Зародыш 18 + Голова 27"], rewards: [{exp: "90", gold: "75", pills: "—", cash: "—"}, {exp: "180", gold: "113", pills: "—", cash: "—"}, {exp: "270", gold: "150", pills: "—", cash: "—"}], total: "Зародыш 39, Голова 63" },
+    { name: "Куча листвы", floor: "G-2", reqs: ["Рваная маска 10 + Шип 5", "Рваная маска 20 + Шип 10", "Рваная маска 23 + Шип 15"], rewards: [{exp: "90", gold: "—", pills: "—", cash: "—"}, {exp: "180", gold: "—", pills: "—", cash: "—"}, {exp: "270", gold: "—", pills: "—", cash: "—"}], total: "Рваная маска 53, Шип 30" },
+    { name: "Заросли волчьей ягоды", floor: "G-2", reqs: ["Рваная маска 7 + Шип 12", "Рваная маска 14 + Шип 24", "Рваная маска 18 + Шип 27"], rewards: [{exp: "60", gold: "75", pills: "—", cash: "—"}, {exp: "120", gold: "113", pills: "—", cash: "—"}, {exp: "180", gold: "150", pills: "—", cash: "—"}], total: "Рваная маска 39, Шип 63" },
+    { name: "Будка под крыльцом", floor: "G-3", reqs: ["Щупальце 10 + Коготь 5", "Щупальце 20 + Коготь 10", "Щупальце 23 + Коготь 15"], rewards: [{exp: "120", gold: "—", pills: "—", cash: "—"}, {exp: "180", gold: "—", pills: "—", cash: "—"}, {exp: "270", gold: "—", pills: "—", cash: "—"}], total: "Щупальце 53, Коготь 30" },
+    { name: "Разбитый кондиционер", floor: "G-3", reqs: ["Щупальце 7 + Коготь 12", "Щупальце 14 + Коготь 24", "Щупальце 18 + Коготь 27"], rewards: [{exp: "60", gold: "—", pills: "53", cash: "—"}, {exp: "120", gold: "—", pills: "68", cash: "—"}, {exp: "180", gold: "—", pills: "83", cash: "—"}], total: "Щупальце 39, Коготь 63" },
+    { name: "Паучья кладка", floor: "H-1", reqs: ["Лохмотье 15 + Потертый череп 8", "Лохмотье 25 + Потертый череп 17", "Лохмотье 35 + Потертый череп 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Лохмотье 75, Потертый череп 49" },
+    { name: "Старый сундук", floor: "H-1", reqs: ["Лохмотье 8 + Потертый череп 15", "Лохмотье 17 + Потертый череп 25", "Лохмотье 24 + Потертый череп 35"], rewards: [{exp: "50", gold: "75", pills: "—", cash: "—"}, {exp: "125", gold: "188", pills: "—", cash: "—"}, {exp: "175", gold: "263", pills: "—", cash: "—"}], total: "Лохмотье 49, Потертый череп 75" },
+    { name: "Пыльный шкаф", floor: "H-2", reqs: ["Рукоять 15 + Кисть 8", "Рукоять 25 + Кисть 17", "Рукоять 35 + Кисть 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Рукоять 75, Кисть 49" },
+    { name: "Угол чердака", floor: "H-2", reqs: ["Рукоять 8 + Кисть 15", "Рукоять 17 + Кисть 25", "Рукоять 24 + Кисть 35"], rewards: [{exp: "75", gold: "75", pills: "—", cash: "—"}, {exp: "188", gold: "188", pills: "—", cash: "—"}, {exp: "263", gold: "263", pills: "—", cash: "—"}], total: "Рукоять 49, Кисть 75" },
+    { name: "Место для молитв", floor: "H-3", reqs: ["Лезвия 15 + Палец 8", "Лезвия 25 + Палец 17", "Лезвия 35 + Палец 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Лезвия 75, Палец 49" },
+    { name: "Крыша больницы", floor: "H-3", reqs: ["Лезвия 15 + Палец 9", "Лезвия 19 + Палец 27", "Лезвия 37 + Палец 45"], rewards: [{exp: "50", gold: "—", pills: "83", cash: "—"}, {exp: "125", gold: "—", pills: "98", cash: "—"}, {exp: "175", gold: "—", pills: "113", cash: "—"}], total: "Лезвия 71, Палец 81" }
+];
+
+// --- ЛОГИКА ЧЕКБОКСОВ ---
+function getSaved(key, defaultVal) {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : defaultVal;
+}
+
+function toggleSave(key, checked, el) {
+    localStorage.setItem(key, checked);
+    if (checked) el.classList.add('checked');
+    else el.classList.remove('checked');
+}
+
+// --- РЕНДЕР БОССОВ ---
+function renderBosses(filter = "") {
+    const container = document.getElementById("bossList");
+    container.innerHTML = "";
+    const floors = [...new Set(bosses.map(b => b.floor.split('-')[0]))].sort();
+    
+    floors.forEach(floor => {
+        const floorBosses = bosses.filter(b => b.floor.startsWith(floor) && b.name.toLowerCase().includes(filter.toLowerCase()));
+        if (floorBosses.length === 0) return;
+        
+        const floorId = `floor-${floor}`;
+        const isOpen = filter !== "" ? "open" : "";
+        
+        let html = `<div class="floor-header" onclick="toggleFloor('${floorId}')">
+            <span>Этаж ${floor}</span><span>▼</span></div>
+            <div class="floor-content ${isOpen}" id="${floorId}">`;
+        
+        floorBosses.forEach(b => {
+            let pillsDisplay = b.pills;
+            if (b.pillsChance && b.pills !== "—") {
+                pillsDisplay = `${b.pills} <span class="chance-pills">(${b.pillsChance})</span>`;
+            }
+            
+            let dropCheckboxes = "";
+            const dropItems = b.drop.split(',').map(s => s.trim());
+            let maleDrop = [], femaleDrop = [];
+            dropItems.forEach(d => {
+                if (d.includes('(М):')) maleDrop.push(d.replace('(М):', '').trim());
+                else if (d.includes('(Ж):')) femaleDrop.push(d.replace('(Ж):', '').trim());
+                else maleDrop.push(d);
+            });
+
+            const createCheckboxes = (arr, prefix) => {
+                return arr.map(item => {
+                    if (!item || item === "Комната") return "";
+                    const cleanName = item.replace(/\(x\d+\)/g, '').trim();
+                    const id = `drop_${b.name}_${prefix}_${cleanName}`;
+                    const isChecked = getSaved(id, false);
+                    return `<label class="checkbox-label ${isChecked ? 'checked' : ''}" id="lbl_${id}">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${id}', this.checked, this.parentElement)">
+                        ${item}
+                    </label>`;
+                }).join('');
+            };
+
+            if (maleDrop.length > 1 || femaleDrop.length > 1 || b.drop.includes('(М):')) {
+                dropCheckboxes += `<div class="small" style="margin-top:8px; color:#888;">Отметить дроп:</div>`;
+                if (maleDrop.length > 1) dropCheckboxes += `<div class="small" style="color:#3498db;">(М):</div><div class="checkbox-group">${createCheckboxes(maleDrop, 'M')}</div>`;
+                if (femaleDrop.length > 1) dropCheckboxes += `<div class="small" style="color:#e74c3c;">(Ж):</div><div class="checkbox-group">${createCheckboxes(femaleDrop, 'F')}</div>`;
+            } else {
+                const singleDrop = dropItems.filter(d => d !== "Комната");
+                if (singleDrop.length > 0) {
+                    dropCheckboxes += `<div class="small" style="margin-top:8px; color:#888;">Отметить дроп:</div><div class="checkbox-group">${createCheckboxes(singleDrop, 'S')}</div>`;
+                }
+            }
+
+            html += `
+            <div class="card">
+                <h3>${b.name} <span class="small">(${b.floor})</span></h3>
+                <div class="stats-row">
+                    <span>❤️ Жизнь: <span class="stat-hp">${b.hp}</span></span>
+                    <span>⚔️ Урон: <span class="stat-dmg">${b.dmg}</span></span>
+                </div>
+                <div class="sub">Награды: ур. ${b.level}</div>
+                <table class="reward-table">
+                    <tr><th>Валюта</th><th>Кол-во</th></tr>
+                    <tr><td class="exp">👁️ Опыт</td><td>${b.exp}</td></tr>
+                    <tr><td class="gold">💰 Золото</td><td>${b.gold}</td></tr>
+                    <tr><td class="pills">💊 Пилюли</td><td>${pillsDisplay}</td></tr>
+                </table>
+                <div class="drop-item">📦 Итем: <span class="item-name">${b.item}</span> <span class="chance">(шанс ${b.chance})</span></div>
+                <div class="drop-item">🚪 Дроп: ${b.drop}</div>
+                ${dropCheckboxes}
+            </div>`;
+        });
+        html += `</div>`;
+        container.innerHTML += html;
+    });
+}
+
+// --- РЕНДЕР БИЗНЕСОВ С ФИЛЬТРОМ ---
+function renderBusinesses() {
+    const container = document.getElementById("bizList");
+    container.innerHTML = "";
+    
+    // Получаем выбранный фильтр
+    const filterVal = document.getElementById("bizFilter") ? document.getElementById("bizFilter").value : "all";
+
+    // Фильтруем массив
+    const filteredBiz = businesses.filter(b => {
+        if (filterVal === "all") return true;
+        // Проверяем, есть ли ХОТЯ БЫ НА ОДНОМ уровне нужная валюта (не прочерк)
+        return b.rewards.some(r => r[filterVal] && r[filterVal] !== "—");
+    });
+
+    const floors = [...new Set(filteredBiz.map(b => b.floor.split('-')[0]))].sort();
+    
+    floors.forEach(floor => {
+        const floorBiz = filteredBiz.filter(b => b.floor.startsWith(floor));
+        if (floorBiz.length === 0) return; // Пропускаем пустые этажи
+
+        let html = `<div class="floor-header" onclick="toggleFloor('biz-${floor}')">
+            <span>Этаж ${floor}</span><span>▼</span></div>
+            <div class="floor-content" id="biz-${floor}">`;
+        
+        floorBiz.forEach(b => {
+            const bizId = `biz_${b.name}`;
+            const isChecked = getSaved(bizId, false);
+            
+            html += `<div class="card">
+                <h3>${b.name} <span class="small">(${b.floor})</span></h3>
+                <table class="biz-table">
+                    <tr><th>Ур.</th><th>Требуется</th><th>Опыт</th><th>Золото</th><th>Пилюли</th><th>Купюры</th></tr>`;
+            for (let i = 0; i < b.reqs.length; i++) {
+                const r = b.rewards[i];
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${b.reqs[i]}</td>
+                    <td class="exp">${r.exp}</td>
+                    <td class="gold">${r.gold}</td>
+                    <td class="pills">${r.pills}</td>
+                    <td class="cash">${r.cash}</td>
+                </tr>`;
+            }
+            html += `</table>
+                <div class="total-row">📊 Итого для макс. уровня: ${b.total}</div>
+                <label class="biz-check ${isChecked ? 'checked' : ''}" id="lbl_${bizId}">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${bizId}', this.checked, this.parentElement)">
+                    ✅ Бизнес прокачан
+                </label>
+            </div>`;
+        });
+        html += `</div>`;
+        container.innerHTML += html;
+    });
+}
+
+// --- РЕНДЕР ИТЕМОВ ---
+function renderItems() {
+    const container = document.getElementById("itemList");
+    container.innerHTML = "";
+    const itemMap = {};
+    bosses.forEach(b => {
+        if (b.item && b.item !== "?") {
+            if (!itemMap[b.item]) itemMap[b.item] = [];
+            itemMap[b.item].push(`${b.name} (${b.chance})`);
+        }
+    });
+    
+    let html = `<div class="card"><h3>Итемы с боссов</h3>`;
+    for (const [item, bossList] of Object.entries(itemMap)) {
+        html += `<div class="drop-item">📦 <span class="item-name">${item}</span> — падает с: ${bossList.join(", ")}</div>`;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function toggleFloor(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("open");
+}
+
+function switchTab(id) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
+    document.querySelector(`.tab[onclick="switchTab('${id}')"]`).classList.add("active");
+    document.getElementById(id).classList.add("active");
+}
+
+function filterBosses() {
+    renderBosses(document.getElementById("searchBoss").value);
+}
+
+// --- КАЛЬКУЛЯТОР W (ОПТИМАЛЬНЫЙ ПЕРЕБОР) ---
+function calculateW() {
+    const A_init = parseInt(document.getElementById('inp-A').value) || 0;
+    const I_init = parseInt(document.getElementById('inp-I').value) || 0;
+    const F_init = parseInt(document.getElementById('inp-F').value) || 0;
+    const X_init = parseInt(document.getElementById('inp-X').value) || 0;
+    const S_init = parseInt(document.getElementById('inp-S').value) || 0;
+    const Z_init = parseInt(document.getElementById('inp-Z').value) || 0;
+    const W_init = parseInt(document.getElementById('inp-W').value) || 0;
+
+    let bestW = -1;
+    let bestActions = Infinity;
+    let bestPlan = null;
+
+    const maxCraft = 500; 
+
+    for (let craftZ = 0; craftZ <= maxCraft; craftZ++) {
+        if (craftZ * 1 > F_init || craftZ * 1 > A_init) break;
+
+        for (let craftS = 0; craftS <= maxCraft; craftS++) {
+            if (craftS * 1 > (F_init - craftZ) || craftS * 1 > I_init) break;
+
+            for (let craftX = 0; craftX <= maxCraft; craftX++) {
+                if (craftX * 1 > (I_init - craftS) || craftX * 1 > (A_init - craftZ)) break;
+
+                let curA = A_init - craftZ - craftX;
+                let curI = I_init - craftS - craftX;
+                let curF = F_init - craftZ - craftS;
+                let curS = S_init + craftS;
+                let curZ = Z_init + craftZ;
+                let curX = X_init + craftX;
+
+                let w_as = Math.min(Math.floor(curA / 3), Math.floor(curS / 2));
+                curA -= w_as * 3;
+                curS -= w_as * 2;
+
+                let w_iz = Math.min(Math.floor(curI / 3), Math.floor(curZ / 2));
+                curI -= w_iz * 3;
+                curZ -= w_iz * 2;
+
+                let w_fx = Math.min(Math.floor(curF / 3), Math.floor(curX / 2));
+                curF -= w_fx * 3;
+                curX -= w_fx * 2;
+
+                let totalW = w_as + w_iz + w_fx;
+                let totalActions = craftZ + craftS + craftX + totalW;
+
+                if (totalW > bestW || (totalW === bestW && totalActions < bestActions)) {
+                    bestW = totalW;
+                    bestActions = totalActions;
+                    bestPlan = { w_as, w_iz, w_fx, craftZ, craftS, craftX, totalW, totalActions };
+                }
+            }
+        }
+    }
+
+    if (!bestPlan) {
+        document.getElementById('calc-results').innerText = "Не удалось найти решение. Проверьте данные.";
+        return;
+    }
+
+    const cost = bestPlan.totalActions * 50;
+    const total_w_final = bestPlan.totalW + W_init;
+
+    let resultText = `=== ОПТИМАЛЬНЫЙ ПЛАН ===\n`;
+    if (bestPlan.craftZ > 0) resultText += `1. Сделать ${bestPlan.craftZ} раз: 1F + 1A = 1Z\n`;
+    if (bestPlan.craftS > 0) resultText += `2. Сделать ${bestPlan.craftS} раз: 1F + 1I = 1S\n`;
+    if (bestPlan.craftX > 0) resultText += `3. Сделать ${bestPlan.craftX} раз: 1I + 1A = 1X\n`;
+    if (bestPlan.craftZ > 0 || bestPlan.craftS > 0 || bestPlan.craftX > 0) resultText += `-----------------------------------\n`;
+    if (bestPlan.w_as > 0) resultText += `4. Собрать ${bestPlan.w_as} раз: 3A + 2S = 1W\n`;
+    if (bestPlan.w_iz > 0) resultText += `5. Собрать ${bestPlan.w_iz} раз: 3I + 2Z = 1W\n`;
+    if (bestPlan.w_fx > 0) resultText += `6. Собрать ${bestPlan.w_fx} раз: 3F + 2X = 1W\n`;
+    resultText += `-----------------------------------\n`;
+    resultText += `ИТОГО ДЕЙСТВИЙ: ${bestPlan.totalActions}\n`;
+    resultText += `СТОИМОСТЬ: ${cost} валюты\n`;
+    resultText += `НОВЫХ W: ${bestPlan.totalW}\n`;
+    resultText += `ВСЕГО W: ${total_w_final}`;
+
+    document.getElementById('calc-results').innerText = resultText;
+}
+
+// Запуск
+renderBosses();
+renderBusinesses();
+renderItems();
+</script>
+</body>
+</html>
