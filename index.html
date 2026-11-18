@@ -124,6 +124,7 @@
     <div class="tab" onclick="switchTab('quests')">КВЕСТЫ</div>
     <div class="tab" onclick="switchTab('calc')">Кальк W</div>
     <div class="tab" onclick="switchTab('items')">Итемы</div>
+    <div class="tab" onclick="switchTab('thanks')">ПОДДЕРЖКА ПРОЕКТА</div>
    
 </div>
 
@@ -190,6 +191,10 @@
 
      <div id="quests" class="content">
         <div id="questList"></div>
+    </div>
+
+        <div id="thanks" class="content">
+        <div id="thanksList"></div>
     </div>
     
     <div id="info1" class="content">
@@ -376,6 +381,12 @@ const quests = [
             { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
         ]
     }
+];
+
+// --- БАЗА ДАННЫХ БЛАГОДАРНОСТЕЙ ---
+const supporters = [
+    { name: "•NW•Killproks", amount: "Владелец проекта", msg: "Спасибо всем, кто помогает!" }, // Это твой ник
+    { name: "•NW•Osangar", amount: "*** руб.", msg: "На развитие базы знаний!" }
 ];
     
 // --- ЛОГИКА ЧЕКБОКСОВ ---
@@ -659,6 +670,45 @@ function calculateW() {
 
     document.getElementById('calc-results').innerText = resultText;
 }
+ // --- РЕНДЕР БЛАГОДАРНОСТЕЙ ---
+function renderThanks() {
+    const container = document.getElementById("thanksList");
+    if (!container) return;
+    container.innerHTML = "";
+
+    let html = `
+    <div class="card" style="border-left: 4px solid #f1c40f; background: rgba(42, 42, 42, 0.8);">
+        <h3 style="color: #f1c40f; text-align: center; font-size: 20px; margin-bottom: 15px;">❤️ Огромное спасибо!</h3>
+        <p style="font-size: 14px; color: #ddd; text-align: center; margin-bottom: 15px;">
+            Этот проект существует благодаря вашей поддержке. Каждый донат (даже самый маленький) помогает оплачивать хостинг, закупать игровую валюту для тестов и поддерживать базу знаний в актуальном состоянии. Вы — лучшие!
+        </p>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="https://dalink.to/killproks" target="_blank" style="display: inline-block; padding: 10px 20px; background: #e74c3c; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Поддержать проект</a>
+        </div>
+    </div>
+
+    <div class="floor-header" onclick="toggleFloor('thanks-list')" style="border-left-color: #f1c40f; margin-top: 15px;">
+        <span>Список поддержавших</span>
+        <span>▼</span>
+    </div>
+    <div class="floor-content open" id="thanks-list" style="margin-top: 5px;">`;
+
+    supporters.forEach(s => {
+        html += `
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; margin-bottom: 8px;">
+            <div style="display: flex; flex-direction: column; gap: 4px; width: 70%;">
+                <span style="font-weight: bold; color: #f39c12; font-size: 15px;">${s.name}</span>
+                ${s.msg ? `<span style="font-size: 12px; color: #aaa; font-style: italic;">"${s.msg}"</span>` : ''}
+            </div>
+            <div style="text-align: right; font-size: 13px; color: #2ecc71; font-weight: bold; width: 30%;">
+                ${s.amount}
+            </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+}
     
 // --- РЕНДЕР КВЕСТОВ ---
 function renderQuests() {
@@ -714,6 +764,7 @@ function renderQuests() {
 }
     
 // Запуск
+renderThanks();
 renderBosses();
 renderQuests();
 renderBusinesses();
