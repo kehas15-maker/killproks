@@ -121,6 +121,7 @@
     <div class="tab" onclick="switchTab('businesses')">Бизнесы</div>
     <div class="tab" onclick="switchTab('info1')">ЗАНАЧКИ</div>
     <div class="tab" onclick="switchTab('info')">ГАЙД</div>
+    <div class="tab" onclick="switchTab('quests')">КВЕСТЫ</div>
     <div class="tab" onclick="switchTab('calc')">Кальк W</div>
     <div class="tab" onclick="switchTab('items')">Итемы</div>
    
@@ -185,6 +186,10 @@
                 <li style="margin-bottom: 8px;">Если ты все сделал правильно у тебя не запорот перс.</li>
             </ol>
         </div>
+    </div>
+
+     <div id="quests" class="content">
+        <div id="questList"></div>
     </div>
     
     <div id="info1" class="content">
@@ -310,7 +315,68 @@ const businesses = [
     { name: "Место для молитв", floor: "H-3", reqs: ["Лезвия 15 + Палец 8", "Лезвия 25 + Палец 17", "Лезвия 35 + Палец 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Лезвия 75, Палец 49" },
     { name: "Крыша больницы", floor: "H-3", reqs: ["Лезвия 15 + Палец 9", "Лезвия 19 + Палец 27", "Лезвия 37 + Палец 45"], rewards: [{exp: "50", gold: "—", pills: "83", cash: "—"}, {exp: "125", gold: "—", pills: "98", cash: "—"}, {exp: "175", gold: "—", pills: "113", cash: "—"}], total: "Лезвия 71, Палец 81" }
 ];
-
+    
+// --- БАЗА ДАННЫХ КВЕСТОВ ---
+const quests = [
+    {
+        group: "1 группа",
+        icon: "img/group1.png",
+        items: [
+            { name: "Квест 1", desc: "Описание первого квеста...", tasks: ["Задание 1", "Задание 2"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } },
+            { name: "Квест 2", desc: "Описание второго квеста...", tasks: ["Задание 1"], reward: { exp: 200, gold: 100, cash: 5, stat_b: 1, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "2 группа",
+        icon: "img/group2.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1", "Задание 2"], reward: { exp: 150, gold: 80, cash: 0, stat_b: 0, stat_a: 2 } }
+        ]
+    },
+    {
+        group: "3 группа",
+        icon: "img/group3.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 300, gold: 200, cash: 10, stat_b: 0, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "4 группа",
+        icon: "img/group4.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "5 группа",
+        icon: "img/group5.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "6 группа",
+        icon: "img/group6.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "7 группа",
+        icon: "img/group7.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
+        ]
+    },
+    {
+        group: "8 группа",
+        icon: "img/group8.png",
+        items: [
+            { name: "Квест 1", desc: "Описание...", tasks: ["Задание 1"], reward: { exp: 100, gold: 50, cash: 0, stat_b: 0, stat_a: 0 } }
+        ]
+    }
+];
+    
 // --- ЛОГИКА ЧЕКБОКСОВ ---
 function getSaved(key, defaultVal) {
     const saved = localStorage.getItem(key);
@@ -592,9 +658,63 @@ function calculateW() {
 
     document.getElementById('calc-results').innerText = resultText;
 }
+    
+// --- РЕНДЕР КВЕСТОВ ---
+function renderQuests() {
+    const container = document.getElementById("questList");
+    if (!container) return;
+    container.innerHTML = "";
 
+    quests.forEach((grp, index) => {
+        const groupId = `quest-group-${index}`;
+        
+        let html = `<div class="floor-header" onclick="toggleFloor('${groupId}')" style="border-left-color: #3498db; margin-top: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="${grp.icon}" onerror="this.style.display='none'" style="width: 30px; height: 30px; object-fit: contain; background: rgba(255,255,255,0.1); padding: 3px; border-radius: 4px;">
+                <span>${grp.group}</span>
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="floor-content" id="${groupId}">`;
+
+        grp.items.forEach(q => {
+            let tasksHtml = "";
+            q.tasks.forEach((t, i) => {
+                tasksHtml += `<li style="margin-bottom: 4px;">${t}</li>`;
+            });
+
+            let statHtml = "";
+            if (q.reward.stat_b > 0) statHtml += `<div class="drop-item" style="color: #9b59b6; margin-top: 4px;">👁️ Безумие: <b>${q.reward.stat_b}</b></div>`;
+            if (q.reward.stat_a > 0) statHtml += `<div class="drop-item" style="color: #e74c3c; margin-top: 4px;">💥 Агрессия: <b>${q.reward.stat_a}</b></div>`;
+
+            html += `
+            <div class="card">
+                <h3>${q.name}</h3>
+                <div class="sub" style="color: #bbb; margin-bottom: 10px;">${q.desc}</div>
+                
+                <div style="font-size: 13px; color: #3498db; margin-bottom: 4px; font-weight: bold;">Задания:</div>
+                <ul style="font-size: 13px; color: #ddd; padding-left: 20px; margin-top: 0; margin-bottom: 10px;">
+                    ${tasksHtml}
+                </ul>
+
+                <div class="total-row" style="border-top-color: #444; padding-top: 8px;">
+                    <div style="font-size: 13px; color: #aaa; margin-bottom: 6px;">Награда:</div>
+                    ${q.reward.exp > 0 ? `<div class="drop-item" style="color: #9b59b6;">👁️ Опыт: <b>${q.reward.exp}</b></div>` : ''}
+                    ${q.reward.gold > 0 ? `<div class="drop-item" style="color: #e67e22;">💰 Золото: <b>${q.reward.gold}</b></div>` : ''}
+                    ${q.reward.cash > 0 ? `<div class="drop-item" style="color: #2ecc71;">💵 Купюры: <b>${q.reward.cash}</b></div>` : ''}
+                    ${statHtml}
+                </div>
+            </div>`;
+        });
+
+        html += `</div>`;
+        container.innerHTML += html;
+    });
+}
+    
 // Запуск
 renderBosses();
+renderQuests();
 renderBusinesses();
 renderItems();
 </script>
