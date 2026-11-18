@@ -306,7 +306,13 @@ const bosses = [
     { name: "Вектор", floor: "H-2", hp: "2kk", dmg: "400-1300", level: "62-140", exp: "858", gold: "403", pills: "—", pillsChance: "", item: "Рукоять", chance: "20%", drop: "Комната" },
     { name: "Самсон", floor: "H-2", hp: "2kk", dmg: "450-1300", level: "62-140", exp: "861", gold: "408", pills: "—", pillsChance: "", item: "Кисть", chance: "20%", drop: "Комната" },
     { name: "Безликая", floor: "H-3", hp: "2kk", dmg: "450-1350", level: "65-155", exp: "864", gold: "409", pills: "—", pillsChance: "", item: "Лезвия", chance: "20%", drop: "Комната" },
-    { name: "Кровожадный Али", floor: "H-3", hp: "2500k", dmg: "500-1500", level: "65-155", exp: "866", gold: "413", pills: "—", pillsChance: "", item: "Палец", chance: "20%", drop: "Комната, Оружие, Штаны, Куртка, Перчатки, Обувь, Аксессуар, Маска, Головной убор" }
+    { name: "Кровожадный Али", floor: "H-3", hp: "2500k", dmg: "500-1500", level: "65-155", exp: "866", gold: "413", pills: "—", pillsChance: "", item: "Палец", chance: "20%", drop: "Комната, Оружие, Штаны, Куртка, Перчатки, Обувь, Аксессуар, Маска, Головной убор" },
+    { name: "Толстяк", floor: "I-1", hp: "5kk", dmg: "1350-4100", level: "90-140", exp: "1150", gold: "1455", pills: "—", pillsChance: "", item: "железка", chance: "20%", drop: "Куртка, Штаны" },
+    { name: "Уборщик", floor: "I-1", hp: "5kk", dmg: "1200-3700", level: "90-140", exp: "1200", gold: "1480", pills: "—", pillsChance: "", item: "Штырь", chance: "20%", drop: "Комната, Оружие" },
+    { name: "Весельчаки", floor: "I-2", hp: "6500k", dmg: "1380-4140", level: "90-150", exp: "1400", gold: "1600", pills: "—", pillsChance: "", item: "Маска", chance: "20%", drop: "Комната, Перчатки, Аксессуар, Шляпа" },
+    { name: "Глаз", floor: "I-2", hp: "6kk", dmg: "1550-4650", level: "90-150", exp: "1375", gold: "1560", pills: "—", pillsChance: "", item: "Ядовитое щупальце", chance: "20%", drop: "Обувь, Маска" },
+    { name: "Гамбит", floor: "I-3", hp: "6kk", dmg: "1140-3430", level: "90-160", exp: "1550", gold: "1700", pills: "—", pillsChance: "", item: "Рог", chance: "20%", drop: "Комната, Оружие" },
+    { name: "Ультиматум", floor: "I-3", hp: "6kk", dmg: "1430-4280", level: "90-160", exp: "1500", gold: "1640", pills: "—", pillsChance: "", item: "Останок", chance: "20%", drop: "Оружие" }
 ];
 
 const businesses = [
@@ -357,7 +363,16 @@ const businesses = [
     { name: "Пыльный шкаф", floor: "H-2", reqs: ["Рукоять 15 + Кисть 8", "Рукоять 25 + Кисть 17", "Рукоять 35 + Кисть 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Рукоять 75, Кисть 49" },
     { name: "Угол чердака", floor: "H-2", reqs: ["Рукоять 8 + Кисть 15", "Рукоять 17 + Кисть 25", "Рукоять 24 + Кисть 35"], rewards: [{exp: "75", gold: "75", pills: "—", cash: "—"}, {exp: "188", gold: "188", pills: "—", cash: "—"}, {exp: "263", gold: "263", pills: "—", cash: "—"}], total: "Рукоять 49, Кисть 75" },
     { name: "Место для молитв", floor: "H-3", reqs: ["Лезвия 15 + Палец 8", "Лезвия 25 + Палец 17", "Лезвия 35 + Палец 24"], rewards: [{exp: "75", gold: "—", pills: "—", cash: "—"}, {exp: "188", gold: "—", pills: "—", cash: "—"}, {exp: "263", gold: "—", pills: "—", cash: "—"}], total: "Лезвия 75, Палец 49" },
-    { name: "Крыша больницы", floor: "H-3", reqs: ["Лезвия 15 + Палец 9", "Лезвия 19 + Палец 27", "Лезвия 37 + Палец 45"], rewards: [{exp: "50", gold: "—", pills: "83", cash: "—"}, {exp: "125", gold: "—", pills: "98", cash: "—"}, {exp: "175", gold: "—", pills: "113", cash: "—"}], total: "Лезвия 71, Палец 81" }
+    { name: "Крыша больницы", floor: "H-3", reqs: ["Лезвия 15 + Палец 9", "Лезвия 19 + Палец 27", "Лезвия 37 + Палец 45"], rewards: [{exp: "50", gold: "—", pills: "83", cash: "—"}, {exp: "125", gold: "—", pills: "98", cash: "—"}, {exp: "175", gold: "—", pills: "113", cash: "—"}], total: "Лезвия 71, Палец 81" },
+        // I-1
+    { name: "Неизвестный артефакт", floor: "I-1", reqs: ["Железка 7 + Штырь 8", "Железка 15 + Штырь 15", "Железка 20 + Штырь 20", "Железка 15 + Штырь 15", "Железка 10 + Штырь 10", "Железка 17 + Штырь 18"], rewards: [{exp: "75", gold: "—", pills: "83", cash: "—"}, {exp: "80", gold: "—", pills: "86", cash: "—"}, {exp: "83", gold: "—", pills: "168", cash: "—"}, {exp: "86", gold: "—", pills: "174", cash: "—"}, {exp: "89", gold: "—", pills: "338", cash: "—"}, {exp: "92", gold: "—", pills: "350", cash: "—"}], total: "Железка 84, Штырь 86" },
+    { name: "Сундук-преобразователь", floor: "I-1", reqs: ["Железка 7 + Штырь 8", "Железка 15 + Штырь 15", "Железка 20 + Штырь 20", "Железка 15 + Штырь 15", "Железка 10 + Штырь 10", "Железка 18 + Штырь 17"], rewards: [{exp: "80", gold: "—", pills: "83", cash: "—"}, {exp: "83", gold: "—", pills: "86", cash: "—"}, {exp: "86", gold: "—", pills: "90", cash: "—"}, {exp: "89", gold: "—", pills: "98", cash: "—"}, {exp: "92", gold: "—", pills: "113", cash: "—"}, {exp: "95", gold: "—", pills: "188", cash: "—"}], total: "Железка 85, Штырь 85" },
+    // I-2
+    { name: "Дьявольское пламя", floor: "I-2", reqs: ["Ядовитое щупальце 7 + Маска 8", "Ядовитое щупальце 15 + Маска 15", "Ядовитое щупальце 20 + Маска 20", "Ядовитое щупальце 15 + Маска 15", "Ядовитое щупальце 10 + Маска 10", "Ядовитое щупальце 18 + Маска 17"], rewards: [{exp: "86", gold: "—", pills: "83", cash: "—"}, {exp: "89", gold: "—", pills: "86", cash: "—"}, {exp: "92", gold: "—", pills: "90", cash: "—"}, {exp: "95", gold: "—", pills: "98", cash: "—"}, {exp: "98", gold: "—", pills: "113", cash: "—"}, {exp: "101", gold: "—", pills: "188", cash: "—"}], total: "Ядовитое щупальце 85, Маска 85" },
+    { name: "Странное свечение", floor: "I-2", reqs: ["Ядовитое щупальце 7 + Маска 8", "Ядовитое щупальце 15 + Маска 15", "Ядовитое щупальце 20 + Маска 20", "Ядовитое щупальце 15 + Маска 15", "Ядовитое щупальце 10 + Маска 10", "Ядовитое щупальце 18 + Маска 17"], rewards: [{exp: "83", gold: "—", pills: "83", cash: "—"}, {exp: "86", gold: "—", pills: "86", cash: "—"}, {exp: "89", gold: "—", pills: "90", cash: "—"}, {exp: "92", gold: "—", pills: "98", cash: "—"}, {exp: "95", gold: "—", pills: "113", cash: "—"}, {exp: "98", gold: "—", pills: "188", cash: "—"}], total: "Ядовитое щупальце 85, Маска 85" },
+    // I-3
+    { name: "Черная дыра", floor: "I-3", reqs: ["Останок 7 + Рог 8", "Останок 15 + Рог 15", "Останок 20 + Рог 20", "Останок 15 + Рог 15", "Останок 10 + Рог 10", "Останок 17 + Рог 18"], rewards: [{exp: "92", gold: "—", pills: "83", cash: "—"}, {exp: "95", gold: "—", pills: "86", cash: "—"}, {exp: "98", gold: "—", pills: "90", cash: "—"}, {exp: "101", gold: "—", pills: "98", cash: "—"}, {exp: "104", gold: "—", pills: "113", cash: "—"}, {exp: "105", gold: "—", pills: "188", cash: "—"}], total: "Останок 84, Рог 86" },
+    { name: "Аномальная зона", floor: "I-3", reqs: ["Останок 7 + Рог 8", "Останок 15 + Рог 15", "Останок 20 + Рог 20", "Останок 15 + Рог 15", "Останок 10 + Рог 10", "Останок 17 + Рог 18"], rewards: [{exp: "?", gold: "?", pills: "?", cash: "?"}, {exp: "?", gold: "?", pills: "?", cash: "?"}, {exp: "?", gold: "?", pills: "?", cash: "?"}, {exp: "?", gold: "?", pills: "?", cash: "?"}, {exp: "?", gold: "?", pills: "?", cash: "?"}, {exp: "?", gold: "?", pills: "?", cash: "?"}], total: "Останок 84, Рог 86" }
 ];
     
 // --- БАЗА ДАННЫХ КВЕСТОВ ---
@@ -496,8 +511,8 @@ function renderBosses(filter = "") {
                     const safeItemName = cleanName.replace(/[«»"'()]/g, '').trim();
                     
                     let genderSuffix = "";
-                    // Если это этаж D, добавляем суффикс пола
-                    if (b.floor.startsWith("D")) {
+                    // Добавляем суффикс пола ТОЛЬКО для этажа D
+                    if (b.floor === "D-1" || b.floor === "D-2" || b.floor === "D-3") {
                         if (prefix === 'M') genderSuffix = "(М)";
                         if (prefix === 'F') genderSuffix = "(Ж)";
                     }
