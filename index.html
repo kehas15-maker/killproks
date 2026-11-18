@@ -458,10 +458,10 @@ function renderBosses(filter = "") {
                     // Формируем путь к картинке
                     const baseImgPath = `img/${safeBossName}_${safeItemName}${genderSuffix}`;
                     
-                    // Загрузка с проверкой на .png и .jpg
+                     // Загрузка с проверкой на .png и .jpg
                     const imgHtml = `<img src="${baseImgPath}.png" 
                                           onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg=true; this.src='${baseImgPath}.jpg';} else {this.style.display='none';}" 
-                                          style="width: 28px; height: 28px; object-fit: contain; margin-right: 8px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px;">`;
+                                          style="width: 40px; height: 40px; object-fit: contain; margin-right: 12px; background: rgba(255,255,255,0.15); padding: 4px; border-radius: 6px;">`;
 
                     return `<label class="checkbox-label ${isChecked ? 'checked' : ''}" id="lbl_${id}" style="display: flex; align-items: center;">
                         <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${id}', this.checked, this.parentElement)" style="margin-right: 6px;">
