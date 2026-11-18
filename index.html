@@ -432,28 +432,38 @@ function renderBosses(filter = "") {
                 else if (d.includes('(Ж):')) femaleDrop.push(d.replace('(Ж):', '').trim());
                 else maleDrop.push(d);
             });
-            const createCheckboxes = (arr, prefix) => {
+
+                        const createCheckboxes = (arr, prefix) => {
                 return arr.map(item => {
                     if (!item || item === "Комната") return "";
+                    
+                    // 1. Очищаем название предмета от (x2) и пробелов
                     const cleanName = item.replace(/\(x\d+\)/g, '').trim();
+                    
+                    // 2. Формируем уникальный ID для сохранения галочки
                     const id = `drop_${b.name}_${prefix}_${cleanName}`;
                     const isChecked = getSaved(id, false);
                     
-                    // Очищаем имена от спецсимволов для создания имени файла
+                    // 3. Очищаем имя босса от кавычек «» "" '' () для имени файла
                     const safeBossName = b.name.replace(/[«»"'()]/g, '').trim();
                     const safeItemName = cleanName.replace(/[«»"'()]/g, '').trim();
                     
-                    // Добавляем пометку пола, если это М или Ж
+                    // 4. Определяем пол (для дропа М/Ж)
                     let genderSuffix = "";
                     if (prefix === 'M') genderSuffix = "(М)";
                     if (prefix === 'F') genderSuffix = "(Ж)";
 
-                    // Итоговое имя файла: img/ИмяБосса_Предмет(Пол).png
-                    const imgSrc = `img/${safeBossName}_${safeItemName}${genderSuffix}.png`;
+                    // 5. Собираем путь к картинке
+                    // Внимание: здесь мы ищем файл с расширением .png
+                    const baseImgPath = `img/${safeBossName}_${safeItemName}${genderSuffix}`;
                     
-                    // Если картинки нет, она просто скроется (не будет битой иконки)
-                    const imgHtml = `<img src="${imgSrc}" onerror="this.style.display='none'" style="width: 28px; height: 28px; object-fit: contain; margin-right: 8px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px;">`;
+                    // 6. Создаем тег картинки. 
+                    // Если .png нет, он попробует .jpg. Если нет и его - просто скроет картинку.
+                    const imgHtml = `<img src="${baseImgPath}.png" 
+                                          onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg=true; this.src='${baseImgPath}.jpg';} else {this.style.display='none';}" 
+                                          style="width: 28px; height: 28px; object-fit: contain; margin-right: 8px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px;">`;
 
+                    // 7. Возвращаем готовую разметку галочки
                     return `<label class="checkbox-label ${isChecked ? 'checked' : ''}" id="lbl_${id}" style="display: flex; align-items: center;">
                         <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSave('${id}', this.checked, this.parentElement)" style="margin-right: 6px;">
                         ${imgHtml}
