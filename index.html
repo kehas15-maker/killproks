@@ -468,13 +468,21 @@ function renderBosses(filter = "") {
             }
             
             let dropCheckboxes = "";
-            const dropItems = b.drop.split(',').map(s => s.trim());
+            // Разделяем дроп по вертикальной черте, если она есть (для этажа D)
+            const dropParts = b.drop.split('|');
+            
             let maleDrop = [], femaleDrop = [];
-            dropItems.forEach(d => {
-                if (d.includes('(М):')) maleDrop.push(d.replace('(М):', '').trim());
-                else if (d.includes('(Ж):')) femaleDrop.push(d.replace('(Ж):', '').trim());
-                else maleDrop.push(d);
-            });
+
+            // Если есть разделение на М и Ж (как у боссов D)
+            if (dropParts.length === 2) {
+                // Берем текст до черты и убираем метку (М):
+                maleDrop = dropParts[0].replace('(М):', '').split(',').map(s => s.trim()).filter(Boolean);
+                // Берем текст после черты и убираем метку (Ж):
+                femaleDrop = dropParts[1].replace('(Ж):', '').split(',').map(s => s.trim()).filter(Boolean);
+            } else {
+                // Если черты нет (обычные боссы), всё кидаем в общий список, убирая (М): или (Ж): на всякий случай
+                maleDrop = b.drop.split(',').map(s => s.trim().replace(/(М):|(Ж):/g, '').trim()).filter(Boolean);
+            }
 
             const createCheckboxes = (arr, prefix) => {
                 return arr.map(item => {
@@ -484,21 +492,17 @@ function renderBosses(filter = "") {
                     const id = `drop_${b.name}_${prefix}_${cleanName}`;
                     const isChecked = getSaved(id, false);
                     
-                    // Очищаем имена от спецсимволов
                     const safeBossName = b.name.replace(/[«»"'()]/g, '').trim();
                     const safeItemName = cleanName.replace(/[«»"'()]/g, '').trim();
                     
-                    // ЛОГИКА ПОЛА: Добавляем (М) или (Ж) ТОЛЬКО если этаж D
                     let genderSuffix = "";
+                    // Если это этаж D, добавляем суффикс пола
                     if (b.floor.startsWith("D")) {
                         if (prefix === 'M') genderSuffix = "(М)";
                         if (prefix === 'F') genderSuffix = "(Ж)";
                     }
 
-                    // Формируем путь к картинке
                     const baseImgPath = `img/${safeBossName}_${safeItemName}${genderSuffix}`;
-                    
-                     // Загрузка с проверкой на .png и .jpg
                     const imgHtml = `<img src="${baseImgPath}.png" 
                                           onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg=true; this.src='${baseImgPath}.jpg';} else {this.style.display='none';}" 
                                           style="width: 40px; height: 40px; object-fit: contain; margin-right: 12px; background: rgba(255,255,255,0.15); padding: 4px; border-radius: 6px;">`;
@@ -510,16 +514,12 @@ function renderBosses(filter = "") {
                     </label>`;
                 }).join('');
             };
-            
-            if (maleDrop.length > 1 || femaleDrop.length > 1 || b.drop.includes('(М):')) {
+
+            // Блок, который выводит галочки на экран
+            if (maleDrop.length > 0 || femaleDrop.length > 0) {
                 dropCheckboxes += `<div class="small" style="margin-top:8px; color:#888;">Отметить дроп:</div>`;
-                if (maleDrop.length > 1) dropCheckboxes += `<div class="small" style="color:#3498db;">(М):</div><div class="checkbox-group">${createCheckboxes(maleDrop, 'M')}</div>`;
-                if (femaleDrop.length > 1) dropCheckboxes += `<div class="small" style="color:#e74c3c;">(Ж):</div><div class="checkbox-group">${createCheckboxes(femaleDrop, 'F')}</div>`;
-            } else {
-                const singleDrop = dropItems.filter(d => d !== "Комната");
-                if (singleDrop.length > 0) {
-                    dropCheckboxes += `<div class="small" style="margin-top:8px; color:#888;">Отметить дроп:</div><div class="checkbox-group">${createCheckboxes(singleDrop, 'S')}</div>`;
-                }
+                if (maleDrop.length > 0) dropCheckboxes += `<div class="small" style="color:#3498db; font-weight: bold;">(М):</div><div class="checkbox-group">${createCheckboxes(maleDrop, 'M')}</div>`;
+                if (femaleDrop.length > 0) dropCheckboxes += `<div class="small" style="color:#e74c3c; font-weight: bold; margin-top: 8px;">(Ж):</div><div class="checkbox-group">${createCheckboxes(femaleDrop, 'F')}</div>`;
             }
 
             html += `
