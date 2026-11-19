@@ -140,6 +140,26 @@
             opacity: 0 !important;
             pointer-events: none; /* Чтобы нельзя было кликнуть второй раз */
         }
+  /* --- СТИЛИ ДЛЯ ИГРЫ --- */
+        .game-stats { display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; flex-wrap: wrap; gap: 10px; }
+        .game-stat { display: flex; flex-direction: column; align-items: center; }
+        .game-stat span:first-child { color: #aaa; font-size: 11px; text-transform: uppercase; }
+        .game-stat span:last-child { color: #f39c12; font-weight: bold; font-size: 16px; }
+        
+        .boss-select { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .boss-btn { flex: 1; padding: 10px; background: #333; border: 2px solid #555; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .boss-btn.active { border-color: #e74c3c; background: #4a1a1a; }
+        
+        .battle-area { background: rgba(42, 42, 42, 0.8); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+        .battle-hp-bar { width: 100%; height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .battle-hp-fill { height: 100%; background: #e74c3c; transition: width 0.3s; }
+        .battle-log { max-height: 150px; overflow-y: auto; font-size: 13px; color: #ccc; text-align: left; margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .shop-item { background: #333; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; font-size: 13px; border: 1px solid #555; }
+        .shop-item:hover { background: #444; }
+        .shop-item .price { color: #f1c40f; font-weight: bold; margin-top: 5px; }
+        
     </style>
 </head>
 <body>
@@ -154,6 +174,7 @@
     <div class="tab" onclick="switchTab('quests')">КВЕСТЫ</div>
     <div class="tab" onclick="switchTab('calc')">Кальк W</div>
     <div class="tab" onclick="switchTab('thanks')">ПОДДЕРЖКА ПРОЕКТА</div>
+    <div class="tab" onclick="switchTab('game')">ИГРА</div>
    
 </div>
 
@@ -163,6 +184,13 @@
         <div id="bossList"></div>
     </div>
 
+    <div id="bosses" class="content active">
+
+    <div id="game" class="content">
+        <div id="gameContainer"></div>
+    </div>
+        
+        
     <div id="businesses" class="content">
         <!-- Новый фильтр по наградам -->
         <select id="bizFilter" class="search" onchange="renderBusinesses()">
@@ -960,6 +988,157 @@ window.addEventListener('load', () => {
         moveRoach();
     }
 });
+   // ==========================================
+//              МИНИ-ИГРА
+// ==========================================
+
+const GAME_DATA = {
+    bosses: [
+        { id: "henry", name: "Генри Литен", hp: 600, dmg: [5, 20], xp: 25, gold: 25, pills: 0 },
+        { id: "amalia", name: "Амалия Банши", hp: 300, dmg: [10, 20], xp: 25, gold: 0, pills: 5 }
+    ],
+    consumables: [
+        { id: "medicine", name: "Лекарство", effect: "heal_percent", value: 0.10, price: 2000, currency: "gold" },
+        { id: "pharmacy", name: "Аптека", effect: "heal_percent", value: 0.50, price: 1000, currency: "pills" },
+        { id: "scream", name: "Крик", effect: "damage_multiplier", value: 3, price: 500, currency: "pills" },
+        { id: "injection", name: "Инъекция", effect: "energy_add", value: 50, price: 1000, currency: "gold" },
+        { id: "adrenaline", name: "Адреналин", effect: "energy_full", value: 0, price: 300, currency: "pills" },
+        { id: "defibrillator", name: "Дефибриллятор", effect: "energy_add", value: 600, price: 5, currency: "bills" }
+    ]
+};
+
+let player = JSON.parse(localStorage.getItem('madness_player')) || {
+    level: 1,
+    xp: 0,
+    max_hp: 100,
+    hp: 100,
+    base_dmg: 10,
+    energy: 100,
+    max_energy: 100,
+    gold: 50000,
+    pills: 5000,
+    bills: 100,
+    stats: { madness: 30, aggression: 30, fury: 30 },
+    currentBoss: null,
+    battleLog: []
+};
+
+function savePlayer() {
+    localStorage.setItem('madness_player', JSON.stringify(player));
+}
+
+function renderGame() {
+    const container = document.getElementById("gameContainer");
+    if (!container) return;
+
+    player.max_hp = 100 + (player.stats.madness * 3);
+    if (player.hp > player.max_hp) player.hp = player.max_hp;
+    player.base_dmg = 10 + (player.stats.aggression * 3);
+
+    let bossHtml = "";
+    GAME_DATA.bosses.forEach(b => {
+        const isActive = player.currentBoss === b.id;
+        bossHtml += `<button class="boss-btn ${isActive ? 'active' : ''}" onclick="selectBoss('${b.id}')">${b.name}</button>`;
+    });
+
+    let currentBossData = GAME_DATA.bosses.find(b => b.id === player.currentBoss);
+    let battleHtml = "";
+    
+    if (currentBossData) {
+        battleHtml = `
+            <div class="battle-area">
+                <h3>${currentBossData.name}</h3>
+                <div class="battle-hp-bar"><div class="battle-hp-fill" style="width: 100%;"></div></div>
+                <p class="small">HP: ${currentBossData.hp} | Урон: ${currentBossData.dmg[0]}-${currentBossData.dmg[1]}</p>
+                <button class="btn-calc" onclick="attackBoss()" style="background: #e74c3c; margin-bottom: 10px;">⚔️ Атаковать</button>
+                <div class="battle-log" id="battleLog">${player.battleLog.join('<br>')}</div>
+            </div>
+        `;
+    } else {
+        battleHtml = `<div class="battle-area"><p style="color:#aaa;">Выбери босса для боя</p></div>`;
+    }
+
+    let shopHtml = "";
+    GAME_DATA.consumables.forEach(item => {
+        shopHtml += `
+            <div class="shop-item" onclick="buyItem('${item.id}')">
+                <div>${item.name}</div>
+                <div class="price">${item.price} ${item.currency}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="game-stats">
+            <div class="game-stat"><span>❤️ HP</span><span>${Math.floor(player.hp)}/${player.max_hp}</span></div>
+            <div class="game-stat"><span>⚡ Энергия</span><span>${player.energy}/${player.max_energy}</span></div>
+            <div class="game-stat"><span>💰 Золото</span><span>${player.gold}</span></div>
+            <div class="game-stat"><span>💊 Пилюли</span><span>${player.pills}</span></div>
+            <div class="game-stat"><span>💵 Купюры</span><span>${player.bills}</span></div>
+        </div>
+
+        <h3 style="color: #f39c12; margin-bottom: 10px;">Выбор босса</h3>
+        <div class="boss-select">${bossHtml}</div>
+
+        ${battleHtml}
+
+        <h3 style="color: #f39c12; margin-top: 20px; margin-bottom: 10px;">Расходники</h3>
+        <div class="shop-grid">${shopHtml}</div>
+    `;
+}
+
+function selectBoss(bossId) {
+    player.currentBoss = bossId;
+    player.battleLog = [`Вы выбрали ${GAME_DATA.bosses.find(b => b.id === bossId).name}`];
+    savePlayer();
+    renderGame();
+}
+
+function attackBoss() {
+    if (!player.currentBoss) return;
+    const boss = GAME_DATA.bosses.find(b => b.id === player.currentBoss);
+    
+    let dmg = player.base_dmg + Math.floor(Math.random() * 10);
+    player.battleLog.push(`Вы нанесли ${dmg} урона!`);
+    
+    let bossDmg = boss.dmg[0] + Math.floor(Math.random() * (boss.dmg[1] - boss.dmg[0]));
+    player.hp -= bossDmg;
+    player.battleLog.push(`${boss.name} нанес ${bossDmg} урона!`);
+
+    if (player.hp <= 0) {
+        player.hp = 1;
+        player.battleLog.push(`Вы проиграли! Восстановите HP.`);
+    }
+
+    if (dmg >= boss.hp) {
+        player.battleLog.push(`🎉 Вы победили ${boss.name}! Получено: ${boss.xp} опыта, ${boss.gold} золота.`);
+        player.gold += boss.gold;
+        player.xp += boss.xp;
+        player.hp = player.max_hp;
+        player.currentBoss = null;
+    }
+
+    if (player.battleLog.length > 10) player.battleLog.shift();
+
+    savePlayer();
+    renderGame();
+}
+
+function buyItem(itemId) {
+    const item = GAME_DATA.consumables.find(i => i.id === itemId);
+    if (!item) return;
+
+    if (player[item.currency] >= item.price) {
+        player[item.currency] -= item.price;
+        player.battleLog.push(`Вы купили ${item.name}`);
+        savePlayer();
+        renderGame();
+    } else {
+        alert("Недостаточно средств!");
+    }
+}
+
+renderGame();
     
 </script>
 </body>
