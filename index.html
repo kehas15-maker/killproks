@@ -110,6 +110,37 @@
         .footer { text-align: center; padding: 20px 10px; background: #111; border-top: 2px solid #333; margin-top: 20px; font-size: 14px; color: #bbb; }
         .footer .clan { font-weight: bold; color: #f39c12; font-size: 16px; margin-bottom: 4px; }
         .footer .author { font-size: 12px; color: #666; font-family: 'Courier New', monospace; }
+          /* --- СТИЛИ ДЛЯ ТАРАКАНА --- */
+        #cockroach {
+            position: fixed;
+            bottom: 10px; /* Чуть выше самого низа экрана */
+            left: 0;
+            font-size: 30px; /* Размер таракана */
+            cursor: pointer;
+            z-index: 9999;
+            user-select: none;
+            /* Плавное движение */
+            transition: transform 0.1s linear, opacity 0.3s ease; 
+            /* Наклон, чтобы он казался бегущим */
+            transform: scaleX(-1); 
+        }
+
+        /* Анимация бега (подпрыгивание) */
+        @keyframes skitter {
+            0%, 100% { transform: scaleX(-1) translateY(0); }
+            50% { transform: scaleX(-1) translateY(-3px); }
+        }
+
+        /* Класс, который добавляется, когда таракан бежит */
+        .running {
+            animation: skitter 0.2s infinite;
+        }
+
+        /* Класс, когда таракана раздавили */
+        .squashed {
+            opacity: 0 !important;
+            pointer-events: none; /* Чтобы нельзя было кликнуть второй раз */
+        }
     </style>
 </head>
 <body>
@@ -250,7 +281,10 @@
     
     <div class="author">®Killproks,  помощник проекта - •NW•Osangar</div>
 </div>
-
+    
+<!-- Таракан -->
+<div id="cockroach" onclick="squashRoach()">🪳</div>
+    
 <script>
 // --- ДАННЫЕ ---
 const bosses = [
@@ -806,6 +840,75 @@ renderBosses();
 renderQuests();
 renderBusinesses();
 
+// --- ЛОГИКА ТАРАКАНА ---
+let roachX = 0;
+let roachDirection = 1; // 1 = вправо, -1 = влево
+let roachSpeed = 1.5; // Скорость (пикселей за кадр)
+let roachElement = document.getElementById("cockroach");
+let isSquashed = false;
+
+function moveRoach() {
+    if (isSquashed || !roachElement) return;
+
+    const maxWidth = window.innerWidth - 40; // Ширина экрана минус размер таракана
+    
+    roachX += roachSpeed * roachDirection;
+
+    // Если таракан ударился о край экрана, он разворачивается
+    if (roachX >= maxWidth) {
+        roachX = maxWidth;
+        roachDirection = -1;
+        roachElement.style.transform = "scaleX(1)"; // Смотрим влево
+    } else if (roachX <= 0) {
+        roachX = 0;
+        roachDirection = 1;
+        roachElement.style.transform = "scaleX(-1)"; // Смотрим вправо
+    }
+
+    roachElement.style.left = roachX + "px";
+
+    // Добавляем анимацию "бега" (чтобы он подпрыгивал)
+    if (!roachElement.classList.contains('running')) {
+        roachElement.classList.add('running');
+    }
+
+    requestAnimationFrame(moveRoach);
+}
+
+// Функция раздавливания
+function squashRoach() {
+    if (isSquashed) return;
+    isSquashed = true;
+    
+    // Останавливаем анимацию бега
+    roachElement.classList.remove('running');
+    
+    // Меняем иконку на "пятно" (можно использовать другой эмодзи, например 💀 или просто пятно)
+    roachElement.innerHTML = "💥"; 
+    
+    // Прячем его через 1.5 секунды
+    setTimeout(() => {
+        roachElement.classList.add('squashed');
+        
+        // Через 5 секунд после того, как его раздавили, он может "возродиться" в углу
+        setTimeout(() => {
+            isSquashed = false;
+            roachElement.innerHTML = "🪳";
+            roachX = 0;
+            roachDirection = 1;
+            roachElement.classList.remove('squashed');
+            moveRoach(); // Запускаем бег заново
+        }, 5000);
+    }, 1500);
+}
+
+// Запускаем таракана, когда сайт загрузился
+window.addEventListener('load', () => {
+    if (roachElement) {
+        moveRoach();
+    }
+});
+    
 </script>
 </body>
 </html>
