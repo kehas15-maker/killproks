@@ -440,11 +440,11 @@ const quests = [
 // --- БАЗА ДАННЫХ БЛАГОДАРНОСТЕЙ ---
 const supporters = [
     { name: "•NW•Killproks", amount: "Владелец проекта", msg: "Спасибо всем, кто помогает!" }, // Это твой ник
-    { name: "•NW•Osangar", amount: "*** руб.", msg: "На развитие базы знаний!" },
-    { name: "•NW•NEO", amount: "*** руб.", msg: "На развитие базы знаний!" },
-    { name: "•NW•EroKsiZ", amount: "*** руб.", msg: "На развитие базы знаний!" },
-    { name: "•NW•NapasiKk-Лидер•NW•", amount: "*** руб.", msg: "Тебе спасибо за труды!" },
-    { name: "•NW•darrrrrya", amount: "*** руб.", msg: "очень удобный визуал, спасибо ☺ за труд и старания" }
+    { name: "•NW•Osangar", msg: "На развитие базы знаний!" },
+    { name: "•NW•NEO", msg: "На развитие базы знаний!" },
+    { name: "•NW•EroKsiZ", msg: "На развитие базы знаний!" },
+    { name: "•NW•NapasiKk-Лидер•NW•", msg: "Тебе спасибо за труды!" },
+    { name: "•NW•darrrrrya", msg: "очень удобный визуал, спасибо ☺ за труд и старания" }
     
 ];
     
@@ -735,7 +735,7 @@ function calculateW() {
 
     document.getElementById('calc-results').innerText = resultText;
 }
- // --- РЕНДЕР БЛАГОДАРНОСТЕЙ ---
+// --- РЕНДЕР БЛАГОДАРНОСТЕЙ ---
 function renderThanks() {
     const container = document.getElementById("thanksList");
     if (!container) return;
@@ -760,21 +760,17 @@ function renderThanks() {
 
     supporters.forEach(s => {
         html += `
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; margin-bottom: 8px;">
-            <div style="display: flex; flex-direction: column; gap: 4px; width: 70%;">
-                <span style="font-weight: bold; color: #f39c12; font-size: 15px;">${s.name}</span>
-                ${s.msg ? `<span style="font-size: 12px; color: #aaa; font-style: italic;">"${s.msg}"</span>` : ''}
-            </div>
-            <div style="text-align: right; font-size: 13px; color: #2ecc71; font-weight: bold; width: 30%;">
-                ${s.amount}
-            </div>
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 15px; margin-bottom: 10px;">
+            <span style="font-weight: bold; color: #f39c12; font-size: 16px; margin-bottom: 5px;">${s.name}</span>
+            ${s.msg ? `<span style="font-size: 13px; color: #ccc; font-style: italic;">"${s.msg}"</span>` : ''}
         </div>`;
     });
 
     html += `</div>`;
     container.innerHTML = html;
 }
-    
+
+ 
 // --- РЕНДЕР КВЕСТОВ ---
 function renderQuests() {
     const container = document.getElementById("questList");
