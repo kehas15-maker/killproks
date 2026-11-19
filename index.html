@@ -988,8 +988,9 @@ window.addEventListener('load', () => {
         moveRoach();
     }
 });
-   // ==========================================
-//              МИНИ-ИГРА
+    
+// ==========================================
+//              МИНИ-ИГРА (v2)
 // ==========================================
 
 const GAME_DATA = {
@@ -1007,7 +1008,7 @@ const GAME_DATA = {
     ]
 };
 
-let player = JSON.parse(localStorage.getItem('madness_player')) || {
+let g_player = JSON.parse(localStorage.getItem('madness_player_game')) || {
     level: 1,
     xp: 0,
     max_hp: 100,
@@ -1023,25 +1024,25 @@ let player = JSON.parse(localStorage.getItem('madness_player')) || {
     battleLog: []
 };
 
-function savePlayer() {
-    localStorage.setItem('madness_player', JSON.stringify(player));
+function g_savePlayer() {
+    localStorage.setItem('madness_player_game', JSON.stringify(g_player));
 }
 
 function renderGame() {
     const container = document.getElementById("gameContainer");
     if (!container) return;
 
-    player.max_hp = 100 + (player.stats.madness * 3);
-    if (player.hp > player.max_hp) player.hp = player.max_hp;
-    player.base_dmg = 10 + (player.stats.aggression * 3);
+    g_player.max_hp = 100 + (g_player.stats.madness * 3);
+    if (g_player.hp > g_player.max_hp) g_player.hp = g_player.max_hp;
+    g_player.base_dmg = 10 + (g_player.stats.aggression * 3);
 
     let bossHtml = "";
     GAME_DATA.bosses.forEach(b => {
-        const isActive = player.currentBoss === b.id;
+        const isActive = g_player.currentBoss === b.id;
         bossHtml += `<button class="boss-btn ${isActive ? 'active' : ''}" onclick="selectBoss('${b.id}')">${b.name}</button>`;
     });
 
-    let currentBossData = GAME_DATA.bosses.find(b => b.id === player.currentBoss);
+    let currentBossData = GAME_DATA.bosses.find(b => b.id === g_player.currentBoss);
     let battleHtml = "";
     
     if (currentBossData) {
@@ -1051,7 +1052,7 @@ function renderGame() {
                 <div class="battle-hp-bar"><div class="battle-hp-fill" style="width: 100%;"></div></div>
                 <p class="small">HP: ${currentBossData.hp} | Урон: ${currentBossData.dmg[0]}-${currentBossData.dmg[1]}</p>
                 <button class="btn-calc" onclick="attackBoss()" style="background: #e74c3c; margin-bottom: 10px;">⚔️ Атаковать</button>
-                <div class="battle-log" id="battleLog">${player.battleLog.join('<br>')}</div>
+                <div class="battle-log" id="battleLog">${g_player.battleLog.join('<br>')}</div>
             </div>
         `;
     } else {
@@ -1070,11 +1071,11 @@ function renderGame() {
 
     container.innerHTML = `
         <div class="game-stats">
-            <div class="game-stat"><span>❤️ HP</span><span>${Math.floor(player.hp)}/${player.max_hp}</span></div>
-            <div class="game-stat"><span>⚡ Энергия</span><span>${player.energy}/${player.max_energy}</span></div>
-            <div class="game-stat"><span>💰 Золото</span><span>${player.gold}</span></div>
-            <div class="game-stat"><span>💊 Пилюли</span><span>${player.pills}</span></div>
-            <div class="game-stat"><span>💵 Купюры</span><span>${player.bills}</span></div>
+            <div class="game-stat"><span>❤️ HP</span><span>${Math.floor(g_player.hp)}/${g_player.max_hp}</span></div>
+            <div class="game-stat"><span>⚡ Энергия</span><span>${g_player.energy}/${g_player.max_energy}</span></div>
+            <div class="game-stat"><span>💰 Золото</span><span>${g_player.gold}</span></div>
+            <div class="game-stat"><span>💊 Пилюли</span><span>${g_player.pills}</span></div>
+            <div class="game-stat"><span>💵 Купюры</span><span>${g_player.bills}</span></div>
         </div>
 
         <h3 style="color: #f39c12; margin-bottom: 10px;">Выбор босса</h3>
@@ -1088,39 +1089,39 @@ function renderGame() {
 }
 
 function selectBoss(bossId) {
-    player.currentBoss = bossId;
-    player.battleLog = [`Вы выбрали ${GAME_DATA.bosses.find(b => b.id === bossId).name}`];
-    savePlayer();
+    g_player.currentBoss = bossId;
+    g_player.battleLog = [`Вы выбрали ${GAME_DATA.bosses.find(b => b.id === bossId).name}`];
+    g_savePlayer();
     renderGame();
 }
 
 function attackBoss() {
-    if (!player.currentBoss) return;
-    const boss = GAME_DATA.bosses.find(b => b.id === player.currentBoss);
+    if (!g_player.currentBoss) return;
+    const boss = GAME_DATA.bosses.find(b => b.id === g_player.currentBoss);
     
-    let dmg = player.base_dmg + Math.floor(Math.random() * 10);
-    player.battleLog.push(`Вы нанесли ${dmg} урона!`);
+    let dmg = g_player.base_dmg + Math.floor(Math.random() * 10);
+    g_player.battleLog.push(`Вы нанесли ${dmg} урона!`);
     
     let bossDmg = boss.dmg[0] + Math.floor(Math.random() * (boss.dmg[1] - boss.dmg[0]));
-    player.hp -= bossDmg;
-    player.battleLog.push(`${boss.name} нанес ${bossDmg} урона!`);
+    g_player.hp -= bossDmg;
+    g_player.battleLog.push(`${boss.name} нанес ${bossDmg} урона!`);
 
-    if (player.hp <= 0) {
-        player.hp = 1;
-        player.battleLog.push(`Вы проиграли! Восстановите HP.`);
+    if (g_player.hp <= 0) {
+        g_player.hp = 1;
+        g_player.battleLog.push(`Вы проиграли! Восстановите HP.`);
     }
 
     if (dmg >= boss.hp) {
-        player.battleLog.push(`🎉 Вы победили ${boss.name}! Получено: ${boss.xp} опыта, ${boss.gold} золота.`);
-        player.gold += boss.gold;
-        player.xp += boss.xp;
-        player.hp = player.max_hp;
-        player.currentBoss = null;
+        g_player.battleLog.push(`🎉 Вы победили ${boss.name}! Получено: ${boss.xp} опыта, ${boss.gold} золота.`);
+        g_player.gold += boss.gold;
+        g_player.xp += boss.xp;
+        g_player.hp = g_player.max_hp;
+        g_player.currentBoss = null;
     }
 
-    if (player.battleLog.length > 10) player.battleLog.shift();
+    if (g_player.battleLog.length > 10) g_player.battleLog.shift();
 
-    savePlayer();
+    g_savePlayer();
     renderGame();
 }
 
@@ -1128,10 +1129,10 @@ function buyItem(itemId) {
     const item = GAME_DATA.consumables.find(i => i.id === itemId);
     if (!item) return;
 
-    if (player[item.currency] >= item.price) {
-        player[item.currency] -= item.price;
-        player.battleLog.push(`Вы купили ${item.name}`);
-        savePlayer();
+    if (g_player[item.currency] >= item.price) {
+        g_player[item.currency] -= item.price;
+        g_player.battleLog.push(`Вы купили ${item.name}`);
+        g_savePlayer();
         renderGame();
     } else {
         alert("Недостаточно средств!");
