@@ -123,7 +123,6 @@
     <div class="tab" onclick="switchTab('info')">ГАЙД</div>
     <div class="tab" onclick="switchTab('quests')">КВЕСТЫ</div>
     <div class="tab" onclick="switchTab('calc')">Кальк W</div>
-    <div class="tab" onclick="switchTab('items')">Итемы</div>
     <div class="tab" onclick="switchTab('thanks')">ПОДДЕРЖКА ПРОЕКТА</div>
    
 </div>
@@ -162,10 +161,6 @@
             <button class="btn-calc" onclick="calculateW()">Рассчитать</button>
             <div class="calc-results" id="calc-results">Ожидание расчёта...</div>
         </div>
-    </div>
-
-    <div id="items" class="content">
-        <div id="itemList"></div>
     </div>
     
     <div id="info" class="content">
@@ -619,25 +614,6 @@ function renderBusinesses() {
     });
 }
 
-// --- РЕНДЕР ИТЕМОВ ---
-function renderItems() {
-    const container = document.getElementById("itemList");
-    container.innerHTML = "";
-    const itemMap = {};
-    bosses.forEach(b => {
-        if (b.item && b.item !== "?") {
-            if (!itemMap[b.item]) itemMap[b.item] = [];
-            itemMap[b.item].push(`${b.name} (${b.chance})`);
-        }
-    });
-    
-    let html = `<div class="card"><h3>Итемы с боссов</h3>`;
-    for (const [item, bossList] of Object.entries(itemMap)) {
-        html += `<div class="drop-item">📦 <span class="item-name">${item}</span> — падает с: ${bossList.join(", ")}</div>`;
-    }
-    html += `</div>`;
-    container.innerHTML = html;
-}
 
 function toggleFloor(id) {
     const el = document.getElementById(id);
@@ -829,7 +805,7 @@ renderThanks();
 renderBosses();
 renderQuests();
 renderBusinesses();
-renderItems();
+
 </script>
 </body>
 </html>
