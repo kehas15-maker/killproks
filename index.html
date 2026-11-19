@@ -111,17 +111,16 @@
         .footer .clan { font-weight: bold; color: #f39c12; font-size: 16px; margin-bottom: 4px; }
         .footer .author { font-size: 12px; color: #666; font-family: 'Courier New', monospace; }
           /* --- СТИЛИ ДЛЯ ТАРАКАНА --- */
+        
         #cockroach {
             position: fixed;
-            bottom: 10px; /* Чуть выше самого низа экрана */
+            top: calc(100vh - 50px); /* Стартовая позиция: низ экрана */
             left: 0;
-            font-size: 30px; /* Размер таракана */
+            font-size: 30px;
             cursor: pointer;
             z-index: 9999;
             user-select: none;
-            /* Плавное движение */
             transition: transform 0.1s linear, opacity 0.3s ease; 
-            /* Наклон, чтобы он казался бегущим */
             transform: scaleX(-1); 
         }
 
@@ -840,34 +839,55 @@ renderBosses();
 renderQuests();
 renderBusinesses();
 
-// --- ЛОГИКА ТАРАКАНА ---
+// --- ЛОГИКА ТАРАКАНА (ЗИГЗАГ) ---
 let roachX = 0;
-let roachDirection = 1; // 1 = вправо, -1 = влево
-let roachSpeed = 1.5; // Скорость (пикселей за кадр)
+let roachY = window.innerHeight - 50; // Стартовая позиция по Y
+let roachDirectionX = 1; // 1 = вправо, -1 = влево
+let roachSpeedX = 1.5; // Скорость по горизонтали
+let roachSpeedY = 0.5; // Скорость по вертикали (зигзаг)
+let roachDirY = 1; // 1 = вниз, -1 = вверх
 let roachElement = document.getElementById("cockroach");
 let isSquashed = false;
 
 function moveRoach() {
     if (isSquashed || !roachElement) return;
 
-    const maxWidth = window.innerWidth - 40; // Ширина экрана минус размер таракана
-    
-    roachX += roachSpeed * roachDirection;
+    // Движение по X
+    const maxWidth = window.innerWidth - 40;
+    roachX += roachSpeedX * roachDirectionX;
 
-    // Если таракан ударился о край экрана, он разворачивается
+    // Отскок от краев по X
     if (roachX >= maxWidth) {
         roachX = maxWidth;
-        roachDirection = -1;
-        roachElement.style.transform = "scaleX(1)"; // Смотрим влево
+        roachDirectionX = -1;
+        roachElement.style.transform = "scaleX(1)"; 
     } else if (roachX <= 0) {
         roachX = 0;
-        roachDirection = 1;
-        roachElement.style.transform = "scaleX(-1)"; // Смотрим вправо
+        roachDirectionX = 1;
+        roachElement.style.transform = "scaleX(-1)"; 
     }
 
-    roachElement.style.left = roachX + "px";
+    // Движение по Y (зигзаг)
+    // Определяем нижнюю границу (не вылезать за пределы экрана)
+    const minY = window.innerHeight - 100; // Чуть выше самого низа
+    const maxY = window.innerHeight - 20;  // Самый низ
 
-    // Добавляем анимацию "бега" (чтобы он подпрыгивал)
+    roachY += roachSpeedY * roachDirY;
+
+    // Если таракан уперся в верхнюю или нижнюю границу зигзага, меняем направление
+    if (roachY >= maxY) {
+        roachY = maxY;
+        roachDirY = -1; // Теперь вверх
+    } else if (roachY <= minY) {
+        roachY = minY;
+        roachDirY = 1; // Теперь вниз
+    }
+
+    // Применяем позиции
+    roachElement.style.left = roachX + "px";
+    roachElement.style.top = roachY + "px";
+
+    // Анимация бега
     if (!roachElement.classList.contains('running')) {
         roachElement.classList.add('running');
     }
@@ -875,34 +895,29 @@ function moveRoach() {
     requestAnimationFrame(moveRoach);
 }
 
-// Функция раздавливания
 function squashRoach() {
     if (isSquashed) return;
     isSquashed = true;
     
-    // Останавливаем анимацию бега
     roachElement.classList.remove('running');
-    
-    // Меняем иконку на "пятно" (можно использовать другой эмодзи, например 💀 или просто пятно)
     roachElement.innerHTML = "💥"; 
     
-    // Прячем его через 1.5 секунды
     setTimeout(() => {
         roachElement.classList.add('squashed');
         
-        // Через 5 секунд после того, как его раздавили, он может "возродиться" в углу
         setTimeout(() => {
             isSquashed = false;
             roachElement.innerHTML = "🪳";
             roachX = 0;
-            roachDirection = 1;
+            roachY = window.innerHeight - 50;
+            roachDirectionX = 1;
+            roachDirY = 1;
             roachElement.classList.remove('squashed');
-            moveRoach(); // Запускаем бег заново
+            moveRoach(); 
         }, 5000);
     }, 1500);
 }
 
-// Запускаем таракана, когда сайт загрузился
 window.addEventListener('load', () => {
     if (roachElement) {
         moveRoach();
