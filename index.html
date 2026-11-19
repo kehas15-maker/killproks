@@ -566,9 +566,14 @@ function renderBosses(filter = "") {
                 if (femaleDrop.length > 0) dropCheckboxes += `<div class="small" style="color:#e74c3c; font-weight: bold; margin-top: 8px;">(Ж):</div><div class="checkbox-group">${createCheckboxes(femaleDrop, 'F')}</div>`;
             }
 
+            // Формируем путь к иконке босса
+            const bossNameSafe = b.name.replace(/[«»"'()]/g, '').trim();
+            const bossImg = `img/${bossNameSafe}.webp`;
+            const bossImgHtml = `<img src="${bossImg}" onerror="this.style.display='none'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px; border: 1px solid #444; vertical-align: middle;">`;
+
             html += `
             <div class="card">
-                <h3>${b.name} <span class="small">(${b.floor})</span></h3>
+                <h3>${bossImgHtml} ${b.name} <span class="small">(${b.floor})</span></h3>
                 <div class="stats-row">
                     <span>❤️ Жизнь: <span class="stat-hp">${b.hp}</span></span>
                     <span>⚔️ Урон: <span class="stat-dmg">${b.dmg}</span></span>
@@ -587,6 +592,23 @@ function renderBosses(filter = "") {
         });
         html += `</div>`;
         container.innerHTML += html;
+
+        // 👇 ДОБАВЛЯЕМ ТЕКСТ-РАЗДЕЛИТЕЛЬ ПОСЛЕ КАЖДОГО ЭТАЖА (кроме последнего) 👇
+        // Здесь ты можешь написать свои тексты. Они будут появляться между этажами.
+        let transitionText = "";
+        if (floor === "A") transitionText = "— информация будет позже —";
+        if (floor === "B") transitionText = "— информация будет позже —";
+        if (floor === "C") transitionText = "— информация будет позже —";
+        if (floor === "D") transitionText = "— информация будет позже —";
+        if (floor === "E") transitionText = "— информация будет позже —";
+        if (floor === "F") transitionText = "— информация будет позже —";
+        if (floor === "G") transitionText = "— информация будет позже —";
+        if (floor === "H") transitionText = "— информация будет позже —";
+        if (floor === "I") transitionText = ""; // На последнем этаже текст не нужен
+
+        if (transitionText !== "") {
+            container.innerHTML += `<div style="text-align: center; color: #e74c3c; font-style: italic; font-size: 14px; margin: 20px 0 10px 0; font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.8);">${transitionText}</div>`;
+        }
     });
 }
 
