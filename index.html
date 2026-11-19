@@ -566,19 +566,34 @@ function renderBosses(filter = "") {
                 if (femaleDrop.length > 0) dropCheckboxes += `<div class="small" style="color:#e74c3c; font-weight: bold; margin-top: 8px;">(Ж):</div><div class="checkbox-group">${createCheckboxes(femaleDrop, 'F')}</div>`;
             }
 
-            // Формируем путь к иконке босса
+                      // Формируем путь к иконке босса
             const bossNameSafe = b.name.replace(/[«»"'()]/g, '').trim();
             const bossImg = `img/${bossNameSafe}.webp`;
-            const bossImgHtml = `<img src="${bossImg}" onerror="this.style.display='none'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px; border: 1px solid #444; vertical-align: middle;">`;
+            
+            // Иконка большого размера
+            const bossImgHtml = `<img src="${bossImg}" onerror="this.style.display='none'" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #444; margin-right: 15px;">`;
 
             html += `
             <div class="card">
-                <h3>${bossImgHtml} ${b.name} <span class="small">(${b.floor})</span></h3>
-                <div class="stats-row">
-                    <span>❤️ Жизнь: <span class="stat-hp">${b.hp}</span></span>
-                    <span>⚔️ Урон: <span class="stat-dmg">${b.dmg}</span></span>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 10px;">
+                    <!-- Иконка слева -->
+                    <div style="flex-shrink: 0;">
+                        ${bossImgHtml}
+                    </div>
+                    <!-- Информация справа от иконки -->
+                    <div style="flex-grow: 1;">
+                        <h3 style="margin-top: 0; margin-bottom: 8px;">${b.name} <span class="small">(${b.floor})</span></h3>
+                        
+                        <div class="stats-row" style="margin-bottom: 6px; padding: 4px 8px;">
+                            <span>❤️ Жизнь: <span class="stat-hp">${b.hp}</span></span>
+                            <span>⚔️ Урон: <span class="stat-dmg">${b.dmg}</span></span>
+                        </div>
+                        
+                        <div class="sub" style="margin-bottom: 0;">Награды: ур. ${b.level}</div>
+                    </div>
                 </div>
-                <div class="sub">Награды: ур. ${b.level}</div>
+
+                <!-- Остальная информация идет ниже (на всю ширину) -->
                 <table class="reward-table">
                     <tr><th>Валюта</th><th>Кол-во</th></tr>
                     <tr><td class="exp">👁️ Опыт</td><td>${b.exp}</td></tr>
