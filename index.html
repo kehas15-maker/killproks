@@ -527,7 +527,23 @@ function renderBosses(filter = "") {
         
         const floorId = `floor-${floor}`;
         const isOpen = filter !== "" ? "open" : "";
-        
+
+        // 👇 ДОБАВЛЯЕМ ТЕКСТ ПЕРЕД КАЖДЫМ ЭТАЖОМ 👇
+        let topText = "";
+        if (floor === "A") topText = "*А2*РАБОТА -Р- Ординаторская  - 2 раза 630 энергии |*A3* -Победа -П-Крошка Сью-5 раз";
+        if (floor === "B") topText = "*В1*БИЗНЕС-Б-ПРОХОДНАЯ-А3 - 1лвл |*В2*-Р-Заведующий-3 раза 780 энергии |*В3* -П-Бруно Цугенкноф - 5 раз -";";
+        if (floor === "C") topText = "Информация уточняется";
+        if (floor === "D") topText = "Информация уточняется";
+        if (floor === "E") topText = "Информация уточняется";
+        if (floor === "F") topText = "Информация уточняется";
+        if (floor === "G") topText = "Информация уточняется";
+        if (floor === "H") topText = "Информация уточняется";
+        if (floor === "I") topText = "Информация уточняется";
+
+        if (topText !== "") {
+            container.innerHTML += `<div style="text-align: center; color: #f1c40f; font-style: italic; font-size: 14px; margin: 20px 0 10px 0; font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.8);">${topText}</div>`;
+        }
+
         let html = `<div class="floor-header" onclick="toggleFloor('${floorId}')">
             <span>Этаж ${floor}</span><span>▼</span></div>
             <div class="floor-content ${isOpen}" id="${floorId}">`;
@@ -635,22 +651,6 @@ function renderBosses(filter = "") {
         html += `</div>`;
         container.innerHTML += html;
 
-        // 👇 ДОБАВЛЯЕМ ТЕКСТ-РАЗДЕЛИТЕЛЬ ПОСЛЕ КАЖДОГО ЭТАЖА (кроме последнего) 👇
-        // Здесь ты можешь написать свои тексты. Они будут появляться между этажами.
-        let transitionText = "";
-        if (floor === "A") transitionText = "— А2- РАБОТА - Ординаторская - 2раза |A3-Победить - Крошку Сью-5 раз —";
-        if (floor === "B") transitionText = "— В1- БИЗНЕС-ПРОХОДНАЯ - 1 | В2 - РАБОТА - Заведующий-3 раза | В3 - победить - Бруно Цугенкноф - 5 раз -";
-        if (floor === "C") transitionText = "— информация будет позже —";
-        if (floor === "D") transitionText = "— информация будет позже —";
-        if (floor === "E") transitionText = "— информация будет позже —";
-        if (floor === "F") transitionText = "— информация будет позже —";
-        if (floor === "G") transitionText = "— информация будет позже —";
-        if (floor === "H") transitionText = "— информация будет позже —";
-        if (floor === "I") transitionText = ""; // На последнем этаже текст не нужен
-
-        if (transitionText !== "") {
-            container.innerHTML += `<div style="text-align: center; color: #e74c3c; font-style: italic; font-size: 14px; margin: 20px 0 10px 0; font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.8);">${transitionText}</div>`;
-        }
     });
 }
 
