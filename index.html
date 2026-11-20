@@ -174,7 +174,7 @@
     <div class="tab" onclick="switchTab('quests')">КВЕСТЫ</div>
     <div class="tab" onclick="switchTab('calc')">Кальк W</div>
     <div class="tab" onclick="switchTab('thanks')">ПОДДЕРЖКА ПРОЕКТА</div>
-<!-- <div class="tab" onclick="switchTab('game')">ИГРА</div> -->
+    <div class="tab" onclick="switchTab('game')">ИГРА</div>
    
 </div>
 
@@ -1010,9 +1010,11 @@ const GAME_DATA = {
 let g_player = JSON.parse(localStorage.getItem('madness_player_game')) || {
     level: 1,
     xp: 0,
-    max_hp: 100,
-    hp: 100,
-    base_dmg: 10,
+    xp_to_next: 100,
+    max_hp: 190, // 30 безумия * 3 + 100
+    hp: 190,
+    base_dmg: 100, // 30 агрессии * 3 + 10
+    crit_chance: 3, // 30 ярости * 0.1 = 3%
     energy: 100,
     max_energy: 100,
     gold: 50000,
@@ -1020,6 +1022,7 @@ let g_player = JSON.parse(localStorage.getItem('madness_player_game')) || {
     bills: 100,
     stats: { madness: 30, aggression: 30, fury: 30 },
     currentBoss: null,
+    bossCurrentHp: 0, // Текущее HP босса
     battleLog: []
 };
 
@@ -1031,9 +1034,11 @@ function renderGame() {
     const container = document.getElementById("gameContainer");
     if (!container) return;
 
+    // Пересчет статов
     g_player.max_hp = 100 + (g_player.stats.madness * 3);
     if (g_player.hp > g_player.max_hp) g_player.hp = g_player.max_hp;
     g_player.base_dmg = 10 + (g_player.stats.aggression * 3);
+    g_player.crit_chance = g_player.stats.fury * 0.1;
 
     let bossHtml = "";
     GAME_DATA.bosses.forEach(b => {
@@ -1045,12 +1050,17 @@ function renderGame() {
     let battleHtml = "";
     
     if (currentBossData) {
+        let hpPercent = (g_player.bossCurrentHp / currentBossData.hp) * 100;
         battleHtml = `
             <div class="battle-area">
                 <h3>${currentBossData.name}</h3>
-                <div class="battle-hp-bar"><div class="battle-hp-fill" style="width: 100%;"></div></div>
-                <p class="small">HP: ${currentBossData.hp} | Урон: ${currentBossData.dmg[0]}-${currentBossData.dmg[1]}</p>
-                <button class="btn-calc" onclick="attackBoss()" style="background: #e74c3c; margin-bottom: 10px;">⚔️ Атаковать</button>
+                <div class="battle-hp-bar"><div class="battle-hp-fill" style="width: ${hpPercent}%; background: ${hpPercent < 30 ? '#e74c3c' : '#2ecc71'};"></div></div>
+                <p class="small">HP: ${Math.max(0, g_player.bossCurrentHp)} / ${currentBossData.hp}</p>
+                
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                    <button class="btn-calc" onclick="attackBoss()" style="background: #e74c3c; flex: 1;">⚔️ Атаковать</button>
+                    <button class="btn-calc" onclick="resetBoss()" style="background: #555; flex: 1;">🔄 Сброс</button>
+                </div>
                 <div class="battle-log" id="battleLog">${g_player.battleLog.join('<br>')}</div>
             </div>
         `;
@@ -1064,13 +1074,17 @@ function renderGame() {
             <div class="shop-item" onclick="buyItem('${item.id}')">
                 <div>${item.name}</div>
                 <div class="price">${item.price} ${item.currency}</div>
+                <div style="font-size: 11px; color: #888; margin-top: 3px;">В сумке: ${g_player.inventory ? (g_player.inventory[item.id] || 0) : 0}</div>
             </div>
         `;
     });
 
     container.innerHTML = `
         <div class="game-stats">
+            <div class="game-stat"><span>Ур.</span><span>${g_player.level}</span></div>
             <div class="game-stat"><span>❤️ HP</span><span>${Math.floor(g_player.hp)}/${g_player.max_hp}</span></div>
+            <div class="game-stat"><span>⚔️ Урон</span><span>${g_player.base_dmg}</span></div>
+            <div class="game-stat"><span>💥 Крит</span><span>${g_player.crit_chance.toFixed(1)}%</span></div>
             <div class="game-stat"><span>⚡ Энергия</span><span>${g_player.energy}/${g_player.max_energy}</span></div>
             <div class="game-stat"><span>💰 Золото</span><span>${g_player.gold}</span></div>
             <div class="game-stat"><span>💊 Пилюли</span><span>${g_player.pills}</span></div>
@@ -1089,7 +1103,18 @@ function renderGame() {
 
 function selectBoss(bossId) {
     g_player.currentBoss = bossId;
-    g_player.battleLog = [`Вы выбрали ${GAME_DATA.bosses.find(b => b.id === bossId).name}`];
+    const boss = GAME_DATA.bosses.find(b => b.id === bossId);
+    g_player.bossCurrentHp = boss.hp; // Сброс HP босса при выборе
+    g_player.battleLog = [`Вы выбрали ${boss.name}`];
+    g_savePlayer();
+    renderGame();
+}
+
+function resetBoss() {
+    if (!g_player.currentBoss) return;
+    const boss = GAME_DATA.bosses.find(b => b.id === g_player.currentBoss);
+    g_player.bossCurrentHp = boss.hp;
+    g_player.battleLog = [`Бой с ${boss.name} начат заново`];
     g_savePlayer();
     renderGame();
 }
@@ -1098,9 +1123,43 @@ function attackBoss() {
     if (!g_player.currentBoss) return;
     const boss = GAME_DATA.bosses.find(b => b.id === g_player.currentBoss);
     
+    // Твой удар
     let dmg = g_player.base_dmg + Math.floor(Math.random() * 10);
-    g_player.battleLog.push(`Вы нанесли ${dmg} урона!`);
+    let isCrit = Math.random() * 100 < g_player.crit_chance;
+    if (isCrit) {
+        dmg *= 2;
+        g_player.battleLog.push(`💥 КРИТ! Вы нанесли ${dmg} урона!`);
+    } else {
+        g_player.battleLog.push(`Вы нанесли ${dmg} урона!`);
+    }
     
+    g_player.bossCurrentHp -= dmg;
+
+    // Проверка победы
+    if (g_player.bossCurrentHp <= 0) {
+        g_player.battleLog.push(`🎉 Вы победили ${boss.name}! Получено: ${boss.xp} опыта, ${boss.gold} золота.`);
+        g_player.gold += boss.gold;
+        g_player.pills += boss.pills;
+        g_player.xp += boss.xp;
+        g_player.bossCurrentHp = 0;
+        
+        // Проверка на повышение уровня
+        if (g_player.xp >= g_player.xp_to_next) {
+            g_player.xp -= g_player.xp_to_next;
+            g_player.level++;
+            g_player.xp_to_next = Math.floor(g_player.xp_to_next * 2);
+            g_player.max_hp += 10;
+            g_player.hp = g_player.max_hp;
+            g_player.battleLog.push(`⭐ УРОВЕНЬ ПОВЫШЕН до ${g_player.level}!`);
+        }
+
+        g_player.currentBoss = null; // Сбрасываем выбор, чтобы можно было выбрать другого
+        g_savePlayer();
+        renderGame();
+        return;
+    }
+
+    // Удар босса
     let bossDmg = boss.dmg[0] + Math.floor(Math.random() * (boss.dmg[1] - boss.dmg[0]));
     g_player.hp -= bossDmg;
     g_player.battleLog.push(`${boss.name} нанес ${bossDmg} урона!`);
@@ -1108,13 +1167,6 @@ function attackBoss() {
     if (g_player.hp <= 0) {
         g_player.hp = 1;
         g_player.battleLog.push(`Вы проиграли! Восстановите HP.`);
-    }
-
-    if (dmg >= boss.hp) {
-        g_player.battleLog.push(`🎉 Вы победили ${boss.name}! Получено: ${boss.xp} опыта, ${boss.gold} золота.`);
-        g_player.gold += boss.gold;
-        g_player.xp += boss.xp;
-        g_player.hp = g_player.max_hp;
         g_player.currentBoss = null;
     }
 
@@ -1128,8 +1180,11 @@ function buyItem(itemId) {
     const item = GAME_DATA.consumables.find(i => i.id === itemId);
     if (!item) return;
 
+    if (!g_player.inventory) g_player.inventory = {};
+
     if (g_player[item.currency] >= item.price) {
         g_player[item.currency] -= item.price;
+        g_player.inventory[itemId] = (g_player.inventory[itemId] || 0) + 1;
         g_player.battleLog.push(`Вы купили ${item.name}`);
         g_savePlayer();
         renderGame();
@@ -1137,7 +1192,7 @@ function buyItem(itemId) {
         alert("Недостаточно средств!");
     }
 }
-
+    
 renderGame();
     
 </script>
