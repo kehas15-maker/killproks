@@ -822,6 +822,24 @@
         padding: 11px 14px;
         font-size: 0.95rem;
       }
+   /* стиль карточек для сета  */
+       .set-item-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.05);
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        border: 1px solid var(--border);
+    }
+    /* Убедимся, что картинка не плющится */
+    .set-item-label img {
+        flex-shrink: 0;
+        border-radius: 3px;
+        background: rgba(0,0,0,0.3);
+    }
 
       .floor-note {
         font-size: 0.78rem;
@@ -1637,61 +1655,136 @@
       { name: "Дальний угол", floor: "N-3", reqs: ["Кукла 7 + Коса 13", "Кукла 9 + Коса 16", "Кукла 21 + Коса 14", "Кукла 17 + Коса 25", "Кукла 20 + Коса 37", "Кукла 60 + Коса 10"], rewards: [{"exp": "—", "gold": "895", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "990", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "1626", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "1766", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "3817", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "4098", "pills": "—", "cash": "—"}], total: "Кукла 134, Коса 115" }
     ];
 
-      // --- ДАННЫЕ СЕТОВ (пока пример) ---
-      const setsData = [
-      {
-      name: "Набор пациента",
-      description: "Базовый сет для новичков. Дает +1 к Безумию, Агрессии и Ярости.",
-      items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа"],
-      bonus: "Безумие +1, Агрессия +1, Ярость +1"
-      },
-      {
-      name: "Безумец",
-      description: "Редкий сет. Дает +2 к Безумию, Агрессии и Ярости.",
-      items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"],
-      bonus: "Безумие +2, Агрессия +2, Ярость +2"
-      }
-      ];
+    // --- ДАННЫЕ СЕТОВ ---
+    // Впиши сюда свои 5 сетов из Пандоры и 2 из Костей
+    const setsData = [
+        {
+            id: "aristokrat",
+            name: "Аристократ",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/aristokrat.png", // Путь к картинке сета
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },
+        {
+            id: "madman_set",
+            name: "Безумец",
+            source: "pandora",
+            image: "img/set_madman.png",
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },
+        {
+            id: "dice_set_1",
+            name: "Сет из Костей (Пример 1)",
+            source: "dice",
+            image: "img/set_dice1.png",
+            items: ["Штаны", "Куртка", "Перчатки"]
+        }
+        // Добавь сюда остальные сеты...
+    ];
 
-      // --- ФУНКЦИЯ ОТРИСОВКИ СЕТОВ ---
-      function renderSets(filter = "") {
-      const container = document.getElementById("settList");
-      if (!container) return;
+      // Функция для получения иконки предмета с учетом сета
+    function getItemIcon(itemName, setId) {
+        const name = itemName.toLowerCase();
+        let prefix = "";
         
-      container.innerHTML = "";
-        
-      // Фильтруем по поиску
-      const filtered = setsData.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
-        
-      if (filtered.length === 0) {
-      container.innerHTML = `<p style="text-align:center; color:#888; margin-top:20px;">Ничего не найдено.</p>`;
-      return;
-      }
+        // Определяем префикс по ID сета (переводим в русский для имени файла)
+        if (setId === 'aristokrat') prefix = 'Аристократ_';
+        else if (setId === 'patient_set') prefix = 'Пациент_'; // Пример
+        else if (setId === 'madman_set') prefix = 'Безумец_'; // Пример
+        // Добавляй сюда остальные сеты по аналогии...
 
-      let html = "";
-      filtered.forEach(set => {
-      html += `
-      <div class="card" style="margin-bottom: 15px;">
-      <div class="card-header">
-      <span class="card-title">${set.name}</span>
-      </div>
-      <p class="drop-line" style="margin-top: 5px;">${set.description}</p>
-      <div class="drop-line"><strong>Предметы:</strong> ${set.items.join(", ")}</div>
-      <div class="drop-line"><strong>Бонус:</strong> ${set.bonus}</div>
-      </div>`;
-      });
+        // Если префикс не найден, используем общий (но у тебя все уникальные, так что лучше прописать все)
+        if (!prefix) return '';
+
+        // Собираем имя файла
+        if (name.includes('штаны')) return `img/${prefix}Штаны.png`;
+        if (name.includes('куртка')) return `img/${prefix}Куртка.png`;
+        if (name.includes('перчатки')) return `img/${prefix}Перчатки.png`;
+        if (name.includes('обувь')) return `img/${prefix}Обувь.png`;
+        if (name.includes('маска')) return `img/${prefix}Маска.png`;
+        if (name.includes('шляпа') || name.includes('головной убор')) return `img/${prefix}Шляпа.png`;
+        if (name.includes('оружие') || name.includes('нож') || name.includes('тесак')) return `img/${prefix}Оружие.png`;
+        if (name.includes('амулет') || name.includes('аксессуар')) return `img/${prefix}Амулет.png`;
+        if (name.includes('питомец')) return `img/${prefix}Питомец.png`;
         
-      container.innerHTML = html;
-      }
+        return ''; 
+    }
+    
+    // Функция проверки сохраненных галочек
+    function isSetItemSaved(setId, itemName) {
+        return localStorage.getItem(`set_${setId}_${itemName}`) === 'true';
+    }
 
-      // Функция для поиска
-      function filterSett() {
-      const val = document.getElementById("searchSett").value;
-      renderSets(val);
-      }
+    // Функция для сохранения галочки
+    function toggleSetItem(setId, itemName, el) {
+        const isChecked = el.checked;
+        localStorage.setItem(`set_${setId}_${itemName}`, isChecked);
+        
+        // Меняем стиль лейбла (подсветка)
+        if (isChecked) {
+            el.parentElement.classList.add('checked');
+        } else {
+            el.parentElement.classList.remove('checked');
+        }
+    }
 
-    // Вызываем отрисовку при загрузке страницы
-    renderSets();
+    // Функция отрисовки карточек
+    function renderSets(searchFilter = "") {
+        const container = document.getElementById("settList");
+        if (!container) return;
+        
+        const sourceFilter = document.getElementById("settSourceFilter")?.value || "all";
+        
+        container.innerHTML = "";
+
+        // Фильтрация
+        const filtered = setsData.filter(set => {
+            const matchesSearch = set.name.toLowerCase().includes(searchFilter.toLowerCase());
+            const matchesSource = (sourceFilter === "all" || set.source === sourceFilter);
+            return matchesSearch && matchesSource;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="text-align:center; width:100%; color:#888;">Ничего не найдено.</p>`;
+            return;
+        }
+
+        filtered.forEach(set => {
+            const card = document.createElement("div");
+            card.className = "set-card";
+
+            // Собираем HTML для галочек
+            let itemsHtml = "";
+               set.items.forEach(item => {
+                const isChecked = isSetItemSaved(set.id, item);
+              const iconPath = getItemIcon(item, set.id);
+                const iconHtml = iconPath ? `<img src="${iconPath}" onerror="this.style.display='none'" style="width: 20px; height: 20px; object-fit: contain; margin-right: 5px;">` : '';
+                
+                itemsHtml += `
+                    <label class="set-item-label ${isChecked ? 'checked' : ''}">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                               onchange="toggleSetItem('${set.id}', '${item}', this)">
+                        ${iconHtml}
+                        <span>${item}</span>
+                    </label>
+                `;
+            });
+
+            // Собираем саму карточку
+            card.innerHTML = `
+                <h3 style="color: var(--gold); margin: 0;">${set.name}</h3>
+                <div style="font-size: 0.8rem; color: #aaa; text-transform: uppercase; margin-bottom: 10px;">
+                    Источник: ${set.source === 'pandora' ? '📦 Сундук Пандоры' : '🎲 Кости'}
+                </div>
+                <img src="${set.image}" alt="${set.name}" class="set-image" onerror="this.style.display='none'">
+                <div class="set-items">
+                    ${itemsHtml}
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+    }
 
 // --- НАВИГАЦИЯ ПО ВКЛАДКАМ ---
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -2454,6 +2547,107 @@
     }
 
     // Инициализация
+        // --- ДАННЫЕ СЕТОВ ---
+    // Впиши сюда свои 5 сетов из Пандоры и 2 из Костей
+    const setsData = [
+        {
+            id: "patient_set",
+            name: "Набор пациента",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/set_patient.png", // Путь к картинке сета
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Оружие"]
+        },
+        {
+            id: "madman_set",
+            name: "Безумец",
+            source: "pandora",
+            image: "img/set_madman.png",
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },
+        {
+            id: "dice_set_1",
+            name: "Сет из Костей (Пример 1)",
+            source: "dice",
+            image: "img/set_dice1.png",
+            items: ["Штаны", "Куртка", "Перчатки"]
+        }
+        // Добавь сюда остальные сеты...
+    ];
+
+    // Функция проверки сохраненных галочек
+    function isSetItemSaved(setId, itemName) {
+        return localStorage.getItem(`set_${setId}_${itemName}`) === 'true';
+    }
+
+    // Функция для сохранения галочки
+    function toggleSetItem(setId, itemName, el) {
+        const isChecked = el.checked;
+        localStorage.setItem(`set_${setId}_${itemName}`, isChecked);
+        
+        // Меняем стиль лейбла (подсветка)
+        if (isChecked) {
+            el.parentElement.classList.add('checked');
+        } else {
+            el.parentElement.classList.remove('checked');
+        }
+    }
+
+    // Функция отрисовки карточек
+    function renderSets(searchFilter = "") {
+        const container = document.getElementById("settList");
+        if (!container) return;
+        
+        const sourceFilter = document.getElementById("settSourceFilter")?.value || "all";
+        
+        container.innerHTML = "";
+
+        // Фильтрация
+        const filtered = setsData.filter(set => {
+            const matchesSearch = set.name.toLowerCase().includes(searchFilter.toLowerCase());
+            const matchesSource = (sourceFilter === "all" || set.source === sourceFilter);
+            return matchesSearch && matchesSource;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="text-align:center; width:100%; color:#888;">Ничего не найдено.</p>`;
+            return;
+        }
+
+        filtered.forEach(set => {
+            const card = document.createElement("div");
+            card.className = "set-card";
+
+            // Собираем HTML для галочек
+            let itemsHtml = "";
+            set.items.forEach(item => {
+                const isChecked = isSetItemSaved(set.id, item);
+                itemsHtml += `
+                    <label class="set-item-label ${isChecked ? 'checked' : ''}">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                               onchange="toggleSetItem('${set.id}', '${item}', this)">
+                        ${item}
+                    </label>
+                `;
+            });
+
+            // Собираем саму карточку
+            card.innerHTML = `
+                <h3 style="color: var(--gold); margin: 0;">${set.name}</h3>
+                <div style="font-size: 0.8rem; color: #aaa; text-transform: uppercase; margin-bottom: 10px;">
+                    Источник: ${set.source === 'pandora' ? '📦 Сундук Пандоры' : '🎲 Кости'}
+                </div>
+                <img src="${set.image}" alt="${set.name}" class="set-image" onerror="this.style.display='none'">
+                <div class="set-items">
+                    ${itemsHtml}
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+    }
+
+    // Вызов при запуске
+    renderSets();
     renderBosses();
     renderBusinesses();
     renderQuests();
