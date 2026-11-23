@@ -1637,7 +1637,61 @@
       { name: "Дальний угол", floor: "N-3", reqs: ["Кукла 7 + Коса 13", "Кукла 9 + Коса 16", "Кукла 21 + Коса 14", "Кукла 17 + Коса 25", "Кукла 20 + Коса 37", "Кукла 60 + Коса 10"], rewards: [{"exp": "—", "gold": "895", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "990", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "1626", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "1766", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "3817", "pills": "—", "cash": "—"}, {"exp": "—", "gold": "4098", "pills": "—", "cash": "—"}], total: "Кукла 134, Коса 115" }
     ];
 
-   
+      // --- ДАННЫЕ СЕТОВ (пока пример) ---
+      const setsData = [
+      {
+      name: "Набор пациента",
+      description: "Базовый сет для новичков. Дает +1 к Безумию, Агрессии и Ярости.",
+      items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа"],
+      bonus: "Безумие +1, Агрессия +1, Ярость +1"
+      },
+      {
+      name: "Безумец",
+      description: "Редкий сет. Дает +2 к Безумию, Агрессии и Ярости.",
+      items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"],
+      bonus: "Безумие +2, Агрессия +2, Ярость +2"
+      }
+      ];
+
+      // --- ФУНКЦИЯ ОТРИСОВКИ СЕТОВ ---
+      function renderSets(filter = "") {
+      const container = document.getElementById("settList");
+      if (!container) return;
+        
+      container.innerHTML = "";
+        
+      // Фильтруем по поиску
+      const filtered = setsData.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
+        
+      if (filtered.length === 0) {
+      container.innerHTML = `<p style="text-align:center; color:#888; margin-top:20px;">Ничего не найдено.</p>`;
+      return;
+      }
+
+      let html = "";
+      filtered.forEach(set => {
+      html += `
+      <div class="card" style="margin-bottom: 15px;">
+      <div class="card-header">
+      <span class="card-title">${set.name}</span>
+      </div>
+      <p class="drop-line" style="margin-top: 5px;">${set.description}</p>
+      <div class="drop-line"><strong>Предметы:</strong> ${set.items.join(", ")}</div>
+      <div class="drop-line"><strong>Бонус:</strong> ${set.bonus}</div>
+      </div>`;
+      });
+        
+      container.innerHTML = html;
+      }
+
+      // Функция для поиска
+      function filterSett() {
+      const val = document.getElementById("searchSett").value;
+      renderSets(val);
+      }
+
+    // Вызываем отрисовку при загрузке страницы
+    renderSets();
 
 // --- НАВИГАЦИЯ ПО ВКЛАДКАМ ---
     const tabBtns = document.querySelectorAll('.tab-btn');
