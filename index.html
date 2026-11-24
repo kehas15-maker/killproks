@@ -2508,23 +2508,72 @@
             source: "pandora", // "pandora" или "dice"
             image: "img/Аристократ_Сет.png", 
             items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        }, 
+      {
+            id: "Hihnik",
+            name: "Хищник",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/Хищник_Сет.png", 
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
         },
+      {
+            id: "Nanok",
+            name: "Нанокостюм",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/Нанокостюм_Сет.png", 
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет"]
+        },
+      {
+            id: "Inkviz",
+            name: "Эксвизитор",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/Эксвизитор_Сет.png", 
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },
+      {
+            id: "Minotavr",
+            name: "Минотавр",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/Минотавр_Сет.png", 
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },      
+      {
+            id: "Minotavr",
+            name: "Минотавр",
+            source: "pandora", // "pandora" или "dice"
+            image: "img/Минотавр_Сет.png", 
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие", "Питомец"]
+        },
+      
         {
-            id: "dice_set_1",
-            name: "Сет из Костей",
+            id: "letopis",
+            name: "Летописец",
             source: "dice",
-            image: "img/dice_set.png",
-            items: ["Штаны", "Куртка", "Перчатки"]
+            image: "img/Летописец_Сет.png",
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет", "Оружие"]
+        },
+      {
+            id: "Chistilhik",
+            name: "Чистильщик",
+            source: "dice",
+            image: "img/Чистильщик_set.png",
+            items: ["Штаны", "Куртка", "Перчатки", "Обувь", "Маска", "Шляпа", "Амулет","Оружие", "Питомец"]
         }
     ];
 
+ // --- ФУНКЦИЯ ПОЛУЧЕНИЯ ИКОНКИ ПРЕДМЕТА ---
     function getItemIcon(itemName, setId) {
-        // ... (оставляем без изменений) ...
         const name = itemName.toLowerCase();
         let prefix = "";
+        
+        // Определяем префикс (русское название сета) по его ID
         if (setId === 'aristokrat') prefix = 'Аристократ_';
-        else if (setId === 'patient_set') prefix = 'Пациент_'; 
-        // ...
+        else if (setId === 'Hihnik') prefix = 'Хищник_';
+        else if (setId === 'Nanok') prefix = 'Нанокостюм_';
+        else if (setId === 'Inkviz') prefix = 'Эксвизитор_'; // Проверь, как называются файлы (Эксвизитор или Инквизитор)
+        else if (setId === 'Minotavr') prefix = 'Минотавр_';
+        else if (setId === 'letopis') prefix = 'Летописец_';
+        else if (setId === 'Chistilhik') prefix = 'Чистильщик_';
         if (!prefix) return '';
         if (name.includes('штаны')) return `img/${prefix}Штаны.png`;
         if (name.includes('куртка')) return `img/${prefix}Куртка.png`;
