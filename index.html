@@ -2528,7 +2528,14 @@
         if (!prefix) return '';
         if (name.includes('штаны')) return `img/${prefix}Штаны.png`;
         if (name.includes('куртка')) return `img/${prefix}Куртка.png`;
-        // ... и так далее ...
+        if (name.includes('перчатки')) return `img/${prefix}Перчатки.png`;
+        if (name.includes('обувь')) return `img/${prefix}Обувь.png`;
+        if (name.includes('маска')) return `img/${prefix}Маска.png`;
+        if (name.includes('шляпа') || name.includes('головной убор')) return `img/${prefix}Шляпа.png`;
+        if (name.includes('оружие') || name.includes('нож') || name.includes('тесак') || name.includes('меч')) return `img/${prefix}Оружие.png`;
+        if (name.includes('амулет') || name.includes('аксессуар')) return `img/${prefix}Амулет.png`;
+        if (name.includes('питомец')) return `img/${prefix}Питомец.png`;
+      
         return ''; 
     }
 
